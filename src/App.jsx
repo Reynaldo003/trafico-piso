@@ -223,10 +223,8 @@ function normalizarBusqueda(valor) {
 
 function validarTelefono(valor) {
   const telefono = soloNumeros(valor);
-
   if (telefono.length === 10) return true;
   if (telefono.length === 12 && telefono.startsWith("52")) return true;
-
   return false;
 }
 
@@ -235,13 +233,11 @@ function mensajeTelefono(valor) {
 
   if (!telefono) return "Captura un teléfono numérico.";
   if (telefono.length < 10) return "El teléfono debe tener mínimo 10 dígitos.";
-  if (telefono.length === 11) {
-    return "El teléfono no puede tener 11 dígitos. Usa 10 dígitos o 52 + 10 dígitos.";
-  }
+  if (telefono.length === 11) return "Usa 10 dígitos o 52 + 10 dígitos.";
   if (telefono.length === 12 && !telefono.startsWith("52")) {
-    return "Si el teléfono tiene 12 dígitos, debe iniciar con 52.";
+    return "Si tiene 12 dígitos debe iniciar con 52.";
   }
-  if (telefono.length > 12) return "El teléfono no puede tener más de 12 dígitos.";
+  if (telefono.length > 12) return "Máximo 12 dígitos.";
 
   return "Teléfono inválido.";
 }
@@ -249,7 +245,6 @@ function mensajeTelefono(valor) {
 function validarEmail(valor) {
   const email = texto(valor);
   if (!email) return true;
-
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
@@ -277,66 +272,69 @@ function obtenerErrores(form) {
   const errores = {};
 
   if (!texto(form.agencia)) errores.agencia = "Selecciona el dealer.";
-  if (!texto(form.nombre_prospecto)) errores.nombre_prospecto = "Captura el nombre del prospecto.";
-  if (!soloNumeros(form.codigo_postal)) errores.codigo_postal = "Captura un código postal numérico.";
+  if (!texto(form.nombre_prospecto)) errores.nombre_prospecto = "Captura el nombre.";
+  if (!soloNumeros(form.codigo_postal)) errores.codigo_postal = "Captura código postal.";
   if (!validarTelefono(form.telefono)) errores.telefono = mensajeTelefono(form.telefono);
-  if (!validarEmail(form.email)) errores.email = "Captura un correo electrónico válido.";
-  if (!texto(form.asesor_ventas)) errores.asesor_ventas = "Selecciona o captura un asesor de ventas.";
-  if (!form.motivo_ingreso) errores.motivo_ingreso = "Selecciona por qué ingresó a la agencia.";
-  if (!form.tiempo_compra) errores.tiempo_compra = "Selecciona cuándo tiene programada su compra.";
+  if (!validarEmail(form.email)) errores.email = "Correo inválido.";
+  if (!texto(form.asesor_ventas)) errores.asesor_ventas = "Selecciona asesor.";
+  if (!form.motivo_ingreso) errores.motivo_ingreso = "Selecciona ingreso.";
+  if (!form.tiempo_compra) errores.tiempo_compra = "Selecciona cuándo compra.";
   if (form.deja_auto_cuenta && !texto(form.modelo_auto_cuenta)) {
-    errores.modelo_auto_cuenta = "Captura el modelo que desea dejar a cuenta.";
+    errores.modelo_auto_cuenta = "Captura modelo.";
   }
-  if (!form.forma_capitalizacion) errores.forma_capitalizacion = "Selecciona una forma de capitalización.";
+  if (!form.forma_capitalizacion) errores.forma_capitalizacion = "Selecciona capitalización.";
   if (Number(soloNumeros(form.presupuesto_estimado) || 0) < 100000) {
-    errores.presupuesto_estimado = "El presupuesto debe tener al menos seis dígitos.";
+    errores.presupuesto_estimado = "Mínimo 6 dígitos.";
   }
   if (Number(soloNumeros(form.enganche_presupuestado) || 0) < 10000) {
-    errores.enganche_presupuestado = "El enganche debe tener al menos cinco dígitos.";
+    errores.enganche_presupuestado = "Mínimo 5 dígitos.";
   }
-  if (!form.mensualidades_presupuestadas) {
-    errores.mensualidades_presupuestadas = "Selecciona mensualidades presupuestadas.";
-  }
-  if (!form.forma_comprobar_ingresos) {
-    errores.forma_comprobar_ingresos = "Selecciona la forma de comprobar ingresos.";
-  }
-  if (!form.motivo_compra) errores.motivo_compra = "Selecciona el motivo de compra.";
-  if (!form.perfil_profesional) errores.perfil_profesional = "Selecciona el perfil profesional.";
-  if (!form.estado_civil) errores.estado_civil = "Selecciona el estado civil.";
+  if (!form.mensualidades_presupuestadas) errores.mensualidades_presupuestadas = "Selecciona mensualidades.";
+  if (!form.forma_comprobar_ingresos) errores.forma_comprobar_ingresos = "Selecciona comprobación.";
+  if (!form.motivo_compra) errores.motivo_compra = "Selecciona motivo.";
+  if (!form.perfil_profesional) errores.perfil_profesional = "Selecciona perfil.";
+  if (!form.estado_civil) errores.estado_civil = "Selecciona estado civil.";
   if (!Array.isArray(form.pasatiempos) || form.pasatiempos.length < 3) {
-    errores.pasatiempos = "Selecciona al menos 3 pasatiempos.";
+    errores.pasatiempos = "Selecciona 3 pasatiempos.";
   }
 
   return errores;
 }
+
 function Campo({ label, icono: Icono, requerido, error, ayuda, children, className = "" }) {
   return (
-    <div className={cls("space-y-1.5", className)}>
-      <label className="flex items-center gap-1.5 text-[12px] font-semibold text-white/90">
-        {Icono ? <Icono className="h-3.5 w-3.5 text-white/75" /> : null}
-        <span className="leading-tight">
+    <div className={cls("min-w-0", className)}>
+      <label className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-white/65">
+        {Icono ? <Icono className="h-3 w-3 shrink-0 text-white/45" /> : null}
+        <span className="truncate">
           {label}
-          {requerido ? <b className="ml-1 text-red-200">*</b> : null}
+          {requerido ? <b className="ml-0.5 text-red-200">*</b> : null}
         </span>
       </label>
 
       {children}
 
-      {ayuda ? <p className="text-[11px] leading-snug text-white/60">{ayuda}</p> : null}
-      {error ? <p className="text-[11px] font-bold leading-snug text-red-200">{error}</p> : null}
+      {error ? (
+        <p className="mt-1 line-clamp-2 text-[10px] font-bold leading-tight text-red-200">
+          {error}
+        </p>
+      ) : ayuda ? (
+        <p className="mt-1 truncate text-[10px] leading-tight text-white/45">
+          {ayuda}
+        </p>
+      ) : null}
     </div>
   );
 }
-
 function Input({ error, className = "", ...props }) {
   return (
     <input
       {...props}
       className={cls(
-        "h-10 w-full rounded-xl border bg-white/10 px-3 text-sm font-semibold text-white outline-none transition placeholder:text-white/40",
+        "h-8 w-full lg:w-40 rounded-lg border bg-white/10 px-2.5 text-xs font-bold text-white outline-none transition placeholder:text-white/35",
         error
-          ? "border-red-200 ring-2 ring-red-400/10"
-          : "border-white/15 focus:border-white/45 focus:ring-2 focus:ring-white/10",
+          ? "border-red-200 ring-1 ring-red-300/20"
+          : "border-white/10 focus:border-white/40 focus:ring-1 focus:ring-white/10",
         props.disabled ? "cursor-not-allowed opacity-50" : "",
         className,
       )}
@@ -349,10 +347,10 @@ function Select({ error, children, className = "", ...props }) {
     <select
       {...props}
       className={cls(
-        "h-10 w-full rounded-xl border bg-[#0b1b54]/90 px-3 text-sm font-semibold text-white outline-none transition",
+        "h-8 w-full lg:w-40 rounded-lg border bg-[#0b1b54]/95 px-2.5 text-xs font-bold text-white outline-none transition",
         error
-          ? "border-red-200 ring-2 ring-red-400/10"
-          : "border-white/15 focus:border-white/45 focus:ring-2 focus:ring-white/10",
+          ? "border-red-200 ring-1 ring-red-300/20"
+          : "border-white/10 focus:border-white/40 focus:ring-1 focus:ring-white/10",
         className,
       )}
     >
@@ -366,25 +364,24 @@ function Textarea({ error, className = "", ...props }) {
     <textarea
       {...props}
       className={cls(
-        "min-h-[74px] w-full resize-none rounded-xl border bg-white/10 px-3 py-2 text-sm font-semibold text-white outline-none transition placeholder:text-white/40",
+        "min-h-[52px] w-full lg:w-40 resize-none rounded-lg border bg-white/10 px-2.5 py-2 text-xs font-bold text-white outline-none transition placeholder:text-white/35",
         error
-          ? "border-red-200 ring-2 ring-red-400/10"
-          : "border-white/15 focus:border-white/45 focus:ring-2 focus:ring-white/10",
+          ? "border-red-200 ring-1 ring-red-300/20"
+          : "border-white/10 focus:border-white/40 focus:ring-1 focus:ring-white/10",
         className,
       )}
     />
   );
 }
-
 function ToggleSiNo({ value, onChange }) {
   return (
-    <div className="grid h-10 grid-cols-2 rounded-xl border border-white/15 bg-white/10 p-1">
+    <div className="grid h-8 w-full lg:w-40 grid-cols-2 rounded-lg border border-white/10 bg-white/10 p-0.5">
       <button
         type="button"
         onClick={() => onChange(true)}
         className={cls(
-          "rounded-lg px-3 text-xs font-black transition",
-          value ? "bg-white text-[#131E5C]" : "text-white hover:bg-white/10",
+          "rounded-md px-2 text-[11px] font-black transition",
+          value ? "bg-white text-[#131E5C]" : "text-white/80 hover:bg-white/10",
         )}
       >
         SÍ
@@ -393,8 +390,8 @@ function ToggleSiNo({ value, onChange }) {
         type="button"
         onClick={() => onChange(false)}
         className={cls(
-          "rounded-lg px-3 text-xs font-black transition",
-          !value ? "bg-white text-[#131E5C]" : "text-white hover:bg-white/10",
+          "rounded-md px-2 text-[11px] font-black transition",
+          !value ? "bg-white text-[#131E5C]" : "text-white/80 hover:bg-white/10",
         )}
       >
         NO
@@ -402,23 +399,20 @@ function ToggleSiNo({ value, onChange }) {
     </div>
   );
 }
-
 function AsesorAutocomplete({ value, onChange, error }) {
   const [abierto, setAbierto] = useState(false);
 
   const opciones = useMemo(() => {
     const q = normalizarBusqueda(value);
-    if (!q) return ASESORES.slice(0, 10);
+    if (!q) return ASESORES.slice(0, 8);
 
-    return ASESORES.filter((asesor) =>
-      normalizarBusqueda(asesor).includes(q),
-    ).slice(0, 10);
+    return ASESORES.filter((asesor) => normalizarBusqueda(asesor).includes(q)).slice(0, 8);
   }, [value]);
 
   return (
-    <div className="relative">
+    <div className="relative w-full lg:w-40">
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/55" />
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-white/45" />
         <Input
           value={value}
           error={error}
@@ -428,17 +422,17 @@ function AsesorAutocomplete({ value, onChange, error }) {
             setAbierto(true);
           }}
           placeholder="Buscar asesor..."
-          className="pl-9"
+          className="pl-7"
         />
       </div>
 
       {abierto ? (
-        <div className="absolute left-0 right-0 z-30 mt-2 max-h-60 overflow-y-auto rounded-xl border border-white/10 bg-[#07122f] p-1.5 shadow-2xl">
+        <div className="absolute left-0 right-0 z-30 mt-1 max-h-48 overflow-y-auto rounded-lg border border-white/10 bg-[#07122f] p-1 shadow-2xl">
           {opciones.length === 0 ? (
             <button
               type="button"
               onClick={() => setAbierto(false)}
-              className="block w-full rounded-lg px-3 py-2 text-left text-xs font-semibold text-white/70 hover:bg-white/10"
+              className="block w-full rounded-md px-2 py-1.5 text-left text-[11px] font-semibold text-white/70 hover:bg-white/10"
             >
               Sin coincidencias. Puedes dejarlo escrito.
             </button>
@@ -452,7 +446,7 @@ function AsesorAutocomplete({ value, onChange, error }) {
                 onChange(asesor);
                 setAbierto(false);
               }}
-              className="block w-full rounded-lg px-3 py-2 text-left text-xs font-bold text-white hover:bg-white/10"
+              className="block w-full rounded-md px-2 py-1.5 text-left text-[11px] font-bold text-white hover:bg-white/10"
             >
               {asesor}
             </button>
@@ -476,13 +470,15 @@ function PasatiemposPicker({ value, onChange, error }) {
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[12px] font-semibold text-white/85">Selecciona mínimo 3</p>
+    <div className="rounded-lg border border-white/10 bg-white/5 p-2">
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">
+          Pasatiempos
+        </p>
 
         <span
           className={cls(
-            "rounded-full border px-2.5 py-0.5 text-[11px] font-black",
+            "rounded-full border px-2 py-0.5 text-[10px] font-black",
             value.length >= 3
               ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-100"
               : "border-amber-300/40 bg-amber-400/15 text-amber-100",
@@ -492,7 +488,7 @@ function PasatiemposPicker({ value, onChange, error }) {
         </span>
       </div>
 
-      <div className="flex max-h-[118px] flex-wrap gap-1.5 overflow-y-auto pr-1">
+      <div className="flex gap-1.5 overflow-x-auto pb-1">
         {PASATIEMPOS.map((item) => {
           const activo = seleccionados.has(item);
 
@@ -502,7 +498,7 @@ function PasatiemposPicker({ value, onChange, error }) {
               type="button"
               onClick={() => toggle(item)}
               className={cls(
-                "rounded-full border px-2.5 py-1.5 text-[11px] font-black transition",
+                "shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-black transition",
                 activo
                   ? "border-white bg-white text-[#131E5C]"
                   : "border-white/15 bg-white/10 text-white hover:bg-white/20",
@@ -514,7 +510,7 @@ function PasatiemposPicker({ value, onChange, error }) {
         })}
       </div>
 
-      {error ? <p className="text-[11px] font-bold text-red-200">{error}</p> : null}
+      {error ? <p className="mt-1 text-[10px] font-bold text-red-200">{error}</p> : null}
     </div>
   );
 }
@@ -571,7 +567,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#131e5c]">
+    <div className="relative min-h-screen overflow-x-hidden">
       <div className="fixed inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(44,91,187,0.24),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.10),_transparent_28%)]" />
         <div className="absolute left-[-12%] top-[-8%] h-72 w-72 rounded-full bg-[#2A63FF]/10 blur-3xl" />
@@ -579,12 +575,12 @@ export default function App() {
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(6,16,45,0.96),rgba(11,31,94,0.92),rgba(7,16,38,0.98))]" />
       </div>
 
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl lg:max-w-[950px] items-center justify-center px-2 py-3 sm:px-4 sm:py-4 lg:px-5">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="relative w-full overflow-hidden rounded-2xl border border-[#131E5C]/10 p-3 shadow-[0_30px_80px_-25px_rgba(19,30,92,0.14)] sm:p-5 lg:p-6"
+          className="relative w-full overflow-hidden rounded-2xl border border-[#131E5C]/10 p-2.5 shadow-[0_30px_80px_-25px_rgba(19,30,92,0.14)] sm:p-4"
           style={{
             backgroundImage: `url(${fondo3})`,
             backgroundSize: "cover",
@@ -592,29 +588,27 @@ export default function App() {
             backgroundRepeat: "no-repeat",
           }}
         >
-          <div className="absolute inset-0 bg-[#071126]/60" />
+          <div className="absolute inset-0 bg-[#071126]/30" />
 
           <div className="relative z-10">
-            <header className="mb-4 text-center">
-              <div className="mb-2 flex justify-center">
-                <span className="inline-flex items-center rounded-full border border-white/60 bg-white/5 px-3 py-1 text-[11px] font-semibold tracking-wide text-white">
-                  Automotriz R&amp;R
-                </span>
+            <header className="mb-3 flex flex-col items-center justify-center gap-2 text-center">
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-1 flex justify-center">
+                  <span className="inline-flex items-center rounded-full border border-white/50 bg-white/5 px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-white">
+                    Automotriz R&amp;R
+                  </span>
+                </div>
+
+                <h1 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
+                  Registro de tráfico de piso
+                </h1>
               </div>
-
-              <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Registro de tráfico de piso
-              </h1>
-
-              <p className="mx-auto mt-1 max-w-2xl text-xs text-white/65 sm:text-sm">
-                Captura rápida del prospecto que ingresa a la agencia.
-              </p>
             </header>
 
             {mensaje ? (
               <div
                 className={cls(
-                  "mb-3 rounded-xl border px-3 py-2 text-xs font-bold",
+                  "mb-2.5 rounded-lg border px-3 py-2 text-xs font-bold",
                   guardado
                     ? "border-emerald-200/30 bg-emerald-400/15 text-emerald-100"
                     : "border-red-200/30 bg-red-400/15 text-red-100",
@@ -625,8 +619,8 @@ export default function App() {
             ) : null}
 
             <form onSubmit={enviarFormulario}>
-              <div className="rounded-2xl border border-white/10 bg-[#06122f]/55 p-3 backdrop-blur-md sm:p-4">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="rounded-2xl border border-white/10 p-2.5 backdrop-blur-xs sm:p-3">
+                <div className="grid gap-2.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                   <Campo label="Dealer" icono={Building2} requerido error={error("agencia")}>
                     <Select
                       value={form.agencia}
@@ -643,11 +637,11 @@ export default function App() {
                   </Campo>
 
                   <Campo
-                    label="Nombre del prospecto"
+                    label="Nombre"
                     icono={UserRound}
                     requerido
                     error={error("nombre_prospecto")}
-                    className="sm:col-span-2"
+                    className="sm:col-span-1"
                   >
                     <Input
                       value={form.nombre_prospecto}
@@ -672,7 +666,7 @@ export default function App() {
                     icono={Phone}
                     requerido
                     error={error("telefono")}
-                    ayuda="Válidos: 2711234567 o 522713943324."
+                    ayuda="10 dígitos o 52 + 10 dígitos."
                   >
                     <Input
                       value={form.telefono}
@@ -693,7 +687,7 @@ export default function App() {
                     />
                   </Campo>
 
-                  <Campo label="Asesor de ventas" icono={Search} requerido error={error("asesor_ventas")}>
+                  <Campo label="Asesor" icono={Search} requerido error={error("asesor_ventas")} className="sm:col-span-1">
                     <AsesorAutocomplete
                       value={form.asesor_ventas}
                       error={error("asesor_ventas")}
@@ -716,18 +710,18 @@ export default function App() {
                     </Select>
                   </Campo>
 
-                  <Campo label="Tipo de persona" icono={Users} requerido>
-                    <div className="grid h-10 grid-cols-2 rounded-xl border border-white/15 bg-white/10 p-1">
+                  <Campo label="Persona" icono={Users} requerido>
+                    <div className="grid h-8 grid-cols-2 rounded-lg border border-white/10 bg-white/10 p-0.5">
                       {TIPOS_PERSONA.map((tipo) => (
                         <button
                           key={tipo}
                           type="button"
                           onClick={() => updateField("tipo_persona", tipo)}
                           className={cls(
-                            "rounded-lg px-3 text-xs font-black transition",
+                            "rounded-md px-2 text-[11px] font-black transition",
                             form.tipo_persona === tipo
                               ? "bg-white text-[#131E5C]"
-                              : "text-white hover:bg-white/10",
+                              : "text-white/80 hover:bg-white/10",
                           )}
                         >
                           {tipo}
@@ -736,7 +730,7 @@ export default function App() {
                     </div>
                   </Campo>
 
-                  <Campo label="Cuándo compra" icono={CalendarDays} requerido error={error("tiempo_compra")}>
+                  <Campo label="Compra" icono={CalendarDays} requerido error={error("tiempo_compra")}>
                     <Select
                       value={form.tiempo_compra}
                       error={error("tiempo_compra")}
@@ -751,7 +745,7 @@ export default function App() {
                     </Select>
                   </Campo>
 
-                  <Campo label="¿Auto a cuenta?" icono={CarFront} requerido>
+                  <Campo label="Auto cuenta" icono={CarFront} requerido>
                     <ToggleSiNo
                       value={form.deja_auto_cuenta}
                       onChange={(valor) => updateField("deja_auto_cuenta", valor)}
@@ -759,7 +753,7 @@ export default function App() {
                   </Campo>
 
                   <Campo
-                    label="Modelo a cuenta"
+                    label="Modelo cuenta"
                     icono={CarFront}
                     requerido={form.deja_auto_cuenta}
                     error={error("modelo_auto_cuenta")}
@@ -773,12 +767,7 @@ export default function App() {
                     />
                   </Campo>
 
-                  <Campo
-                    label="Capitalización"
-                    icono={CircleDollarSign}
-                    requerido
-                    error={error("forma_capitalizacion")}
-                  >
+                  <Campo label="Capitalización" icono={CircleDollarSign} requerido error={error("forma_capitalizacion")}>
                     <Select
                       value={form.forma_capitalizacion}
                       error={error("forma_capitalizacion")}
@@ -793,13 +782,7 @@ export default function App() {
                     </Select>
                   </Campo>
 
-                  <Campo
-                    label="Presupuesto"
-                    icono={BadgeDollarSign}
-                    requerido
-                    error={error("presupuesto_estimado")}
-                    ayuda="Mín. 6 dígitos."
-                  >
+                  <Campo label="Presupuesto" icono={BadgeDollarSign} requerido error={error("presupuesto_estimado")} ayuda="Mín. 6 dígitos.">
                     <Input
                       value={form.presupuesto_estimado}
                       error={error("presupuesto_estimado")}
@@ -809,13 +792,7 @@ export default function App() {
                     />
                   </Campo>
 
-                  <Campo
-                    label="Enganche"
-                    icono={BadgeDollarSign}
-                    requerido
-                    error={error("enganche_presupuestado")}
-                    ayuda="Mín. 5 dígitos."
-                  >
+                  <Campo label="Enganche" icono={BadgeDollarSign} requerido error={error("enganche_presupuestado")} ayuda="Mín. 5 dígitos.">
                     <Input
                       value={form.enganche_presupuestado}
                       error={error("enganche_presupuestado")}
@@ -840,19 +817,14 @@ export default function App() {
                     </Select>
                   </Campo>
 
-                  <Campo label="Comprueba ingresos" icono={ShieldCheck} requerido>
+                  <Campo label="Ingresos" icono={ShieldCheck} requerido>
                     <ToggleSiNo
                       value={form.comprueba_ingresos}
                       onChange={(valor) => updateField("comprueba_ingresos", valor)}
                     />
                   </Campo>
 
-                  <Campo
-                    label="Cómo comprueba"
-                    icono={ClipboardList}
-                    requerido
-                    error={error("forma_comprobar_ingresos")}
-                  >
+                  <Campo label="Comprueba con" icono={ClipboardList} requerido error={error("forma_comprobar_ingresos")}>
                     <Select
                       value={form.forma_comprobar_ingresos}
                       error={error("forma_comprobar_ingresos")}
@@ -881,12 +853,7 @@ export default function App() {
                     </Select>
                   </Campo>
 
-                  <Campo
-                    label="Perfil profesional"
-                    icono={BriefcaseBusiness}
-                    requerido
-                    error={error("perfil_profesional")}
-                  >
+                  <Campo label="Perfil" icono={BriefcaseBusiness} requerido error={error("perfil_profesional")}>
                     <Select
                       value={form.perfil_profesional}
                       error={error("perfil_profesional")}
@@ -939,7 +906,7 @@ export default function App() {
                     icono={HeartHandshake}
                     requerido
                     error={error("pasatiempos")}
-                    className="sm:col-span-2 xl:col-span-3"
+                    className="sm:col-span-2 lg:col-span-2"
                   >
                     <PasatiemposPicker
                       value={form.pasatiempos}
@@ -948,13 +915,16 @@ export default function App() {
                     />
                   </Campo>
 
-                  <Campo label="Comentarios" icono={MessageSquareText} className="sm:col-span-2 xl:col-span-1">
+                  <Campo label="Comentarios" icono={MessageSquareText} className="sm:col-span-1">
                     <Textarea
                       value={form.comentarios}
                       onChange={(e) => updateField("comentarios", e.target.value)}
                       placeholder="Notas..."
                     />
                   </Campo>
+                </div>
+
+                <div className="mt-3 flex flex-col gap-2 rounded-xl border border-white/10 bg-[#06122f]/80 p-2.5 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-xs font-semibold text-white/70">
                     {mostrarErrores && hayErrores
                       ? Object.values(errores)[0]
@@ -964,7 +934,7 @@ export default function App() {
                   <button
                     type="submit"
                     disabled={enviando}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-black text-[#131E5C] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-xs font-black text-[#131E5C] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                   >
                     {enviando ? (
                       <>
@@ -979,7 +949,6 @@ export default function App() {
                     )}
                   </button>
                 </div>
-
               </div>
             </form>
           </div>
