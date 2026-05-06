@@ -1,16 +1,16 @@
-// src/App.jsx
-import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import {
-  ArrowLeft,
-  ArrowRight,
   BadgeDollarSign,
   BriefcaseBusiness,
+  Building2,
   CalendarDays,
   CarFront,
   CheckCircle2,
+  CircleDollarSign,
   ClipboardList,
   HeartHandshake,
+  Loader2,
   Mail,
   MessageSquareText,
   Phone,
@@ -19,11 +19,9 @@ import {
   UserRound,
   Users,
 } from "lucide-react";
-import { crearTraficoPiso } from "./lib/traficoPisoApi";
-import fondo4 from "./assets/fondo4.jpg";
-import fondo3 from "./assets/fondo3.jpg";
 
-const STORAGE_KEY = "trafico-piso-rr-form-v1";
+import { crearTraficoPiso } from "./lib/traficoPisoApi";
+import fondo3 from "./assets/fondo3.jpg";
 
 const AGENCIAS = [
   "VW Cordoba",
@@ -108,7 +106,7 @@ const MOTIVOS_INGRESO = [
   "Vi publicitarios",
   "Siempre me ha gustado la marca",
   "Pasé y sentí curiosidad",
-  "Recibí información por Whatsapp"
+  "Recibí información por Whatsapp",
 ];
 
 const TIPOS_PERSONA = ["Física", "Moral"];
@@ -177,7 +175,7 @@ const PASATIEMPOS = [
   "Aprendizaje de idioma",
 ];
 
-const respuestasIniciales = {
+const FORM_INICIAL = {
   agencia: "",
   nombre_prospecto: "",
   codigo_postal: "",
@@ -204,638 +202,317 @@ const respuestasIniciales = {
   comentarios: "",
 };
 
-const PASOS = [
-  {
-    id: "agencia",
-    tipo: "opcion",
-    etiqueta: "Agencia",
-    titulo: "¿En qué agencia se está registrando el ingreso?",
-    opciones: AGENCIAS,
-  },
-  {
-    id: "nombre_prospecto",
-    tipo: "texto",
-    etiqueta: "Datos generales",
-    titulo: "Nombre del prospecto",
-    placeholder: "NOMBRE COMPLETO",
-    icono: UserRound,
-    mayusculas: true,
-  },
-  {
-    id: "codigo_postal",
-    tipo: "numero",
-    etiqueta: "Datos generales",
-    titulo: "Código postal",
-    placeholder: "Ej. 68300",
-    icono: ClipboardList,
-    maxLength: 5,
-  },
-  {
-    id: "telefono",
-    tipo: "numero",
-    etiqueta: "Datos generales",
-    titulo: "Teléfono del prospecto",
-    placeholder: "10 dígitos",
-    icono: Phone,
-    maxLength: 12,
-  },
-  {
-    id: "email",
-    tipo: "email",
-    etiqueta: "Datos generales",
-    titulo: "Correo electrónico",
-    placeholder: "correo@dominio.com",
-    icono: Mail,
-    opcional: true,
-  },
-  {
-    id: "asesor_ventas",
-    tipo: "asesor",
-    etiqueta: "Datos generales",
-    titulo: "Asesor de ventas que atiende al prospecto",
-  },
-  {
-    id: "motivo_ingreso",
-    tipo: "opcion",
-    etiqueta: "Origen del ingreso",
-    titulo: "Ingresó a la agencia porque...",
-    opciones: MOTIVOS_INGRESO,
-  },
-  {
-    id: "tipo_persona",
-    tipo: "opcion",
-    etiqueta: "Datos generales",
-    titulo: "Tipo de persona",
-    opciones: TIPOS_PERSONA,
-  },
-  {
-    id: "tiempo_compra",
-    tipo: "opcion",
-    etiqueta: "Intención de compra",
-    titulo: "¿Cuándo tiene programado realizar su compra?",
-    opciones: TIEMPOS_COMPRA,
-  },
-  {
-    id: "deja_auto_cuenta",
-    tipo: "booleano",
-    etiqueta: "Intención de compra",
-    titulo: "¿Tiene interés en dejar un auto a cuenta?",
-  },
-  {
-    id: "modelo_auto_cuenta",
-    tipo: "texto",
-    etiqueta: "Intención de compra",
-    titulo: "¿Qué modelo de auto le interesa dejar a cuenta?",
-    placeholder: "Ej. Jetta 2020",
-    icono: CarFront,
-    condicional: (respuestas) => Boolean(respuestas.deja_auto_cuenta),
-  },
-  {
-    id: "forma_capitalizacion",
-    tipo: "opcion",
-    etiqueta: "Intención de compra",
-    titulo: "Forma de capitalización",
-    opciones: FORMAS_CAPITALIZACION,
-  },
-  {
-    id: "presupuesto_estimado",
-    tipo: "numero",
-    etiqueta: "Intención de compra",
-    titulo: "Presupuesto estimado de compra",
-    placeholder: "Mínimo 6 dígitos. Ej. 300000",
-    icono: BadgeDollarSign,
-  },
-  {
-    id: "enganche_presupuestado",
-    tipo: "numero",
-    etiqueta: "Intención de compra",
-    titulo: "Enganche presupuestado",
-    placeholder: "Mínimo 5 dígitos. Ej. 50000",
-    icono: BadgeDollarSign,
-  },
-  {
-    id: "mensualidades_presupuestadas",
-    tipo: "opcion",
-    etiqueta: "Intención de compra",
-    titulo: "Mensualidades presupuestadas",
-    opciones: MENSUALIDADES.map(String),
-    icono: CalendarDays,
-  },
-  {
-    id: "comprueba_ingresos",
-    tipo: "booleano",
-    etiqueta: "Perfil financiero",
-    titulo: "¿Puede comprobar ingresos?",
-    icono: ShieldCheck,
-  },
-  {
-    id: "forma_comprobar_ingresos",
-    tipo: "opcion",
-    etiqueta: "Perfil financiero",
-    titulo: "Forma de comprobar ingresos",
-    opciones: FORMAS_COMPROBAR_INGRESOS,
-  },
-  {
-    id: "motivo_compra",
-    tipo: "opcion",
-    etiqueta: "Perfil del prospecto",
-    titulo: "Motivo de compra",
-    opciones: MOTIVOS_COMPRA,
-  },
-  {
-    id: "perfil_profesional",
-    tipo: "opcion",
-    etiqueta: "Perfil del prospecto",
-    titulo: "Perfil profesional",
-    opciones: PERFILES_PROFESIONALES,
-    icono: BriefcaseBusiness,
-  },
-  {
-    id: "edad",
-    tipo: "numero",
-    etiqueta: "Perfil del prospecto",
-    titulo: "Edad",
-    placeholder: "Ej. 35",
-    icono: UserRound,
-    maxLength: 3,
-    opcional: true,
-  },
-  {
-    id: "cantidad_hijos",
-    tipo: "numero",
-    etiqueta: "Perfil del prospecto",
-    titulo: "Cantidad de hijos",
-    placeholder: "Ej. 0",
-    icono: Users,
-    maxLength: 2,
-    opcional: true,
-  },
-  {
-    id: "estado_civil",
-    tipo: "opcion",
-    etiqueta: "Perfil del prospecto",
-    titulo: "Estado civil",
-    opciones: ESTADOS_CIVILES,
-  },
-  {
-    id: "pasatiempos",
-    tipo: "pasatiempos",
-    etiqueta: "Perfil del prospecto",
-    titulo: "Seleccione al menos 3 pasatiempos",
-  },
-  {
-    id: "comentarios",
-    tipo: "comentario",
-    etiqueta: "Notas finales",
-    titulo: "Comentarios adicionales",
-    placeholder: "Notas adicionales del asesor...",
-    opcional: true,
-  },
-];
-
 function cls(...clases) {
   return clases.filter(Boolean).join(" ");
 }
 
-function soloNumeros(value) {
-  return String(value || "").replace(/\D/g, "");
+function texto(valor) {
+  return String(valor ?? "").trim();
 }
 
-function validarTelefonoMx(value) {
-  const digitos = soloNumeros(value);
+function soloNumeros(valor) {
+  return String(valor ?? "").replace(/\D/g, "");
+}
 
-  if (!digitos) {
-    return false;
-  }
+function normalizarBusqueda(valor) {
+  return texto(valor)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
 
-  // Válido: número nacional de 10 dígitos
-  if (digitos.length === 10) {
-    return true;
-  }
+function validarTelefono(valor) {
+  const telefono = soloNumeros(valor);
 
-  // Válido: número con lada país México: 52 + 10 dígitos
-  if (digitos.length === 12 && digitos.startsWith("52")) {
-    return true;
-  }
+  if (telefono.length === 10) return true;
+  if (telefono.length === 12 && telefono.startsWith("52")) return true;
 
   return false;
 }
 
-function mensajeTelefono(value) {
-  const digitos = soloNumeros(value);
+function mensajeTelefono(valor) {
+  const telefono = soloNumeros(valor);
 
-  if (!digitos) {
-    return "Capture un teléfono numérico.";
+  if (!telefono) return "Captura un teléfono numérico.";
+  if (telefono.length < 10) return "El teléfono debe tener mínimo 10 dígitos.";
+  if (telefono.length === 11) {
+    return "El teléfono no puede tener 11 dígitos. Usa 10 dígitos o 52 + 10 dígitos.";
   }
-
-  if (digitos.length < 10) {
-    return "El teléfono debe tener mínimo 10 dígitos.";
-  }
-
-  if (digitos.length === 11) {
-    return "El teléfono no puede tener 11 dígitos. Use 10 dígitos o 52 + 10 dígitos.";
-  }
-
-  if (digitos.length === 12 && !digitos.startsWith("52")) {
+  if (telefono.length === 12 && !telefono.startsWith("52")) {
     return "Si el teléfono tiene 12 dígitos, debe iniciar con 52.";
   }
-
-  if (digitos.length > 12) {
-    return "El teléfono no puede tener más de 12 dígitos.";
-  }
+  if (telefono.length > 12) return "El teléfono no puede tener más de 12 dígitos.";
 
   return "Teléfono inválido.";
 }
 
-function validarEmail(value) {
-  const email = String(value || "").trim();
-
-  // Si el paso es opcional y viene vacío, se acepta.
-  if (!email) {
-    return true;
-  }
+function validarEmail(valor) {
+  const email = texto(valor);
+  if (!email) return true;
 
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
-function validarPaso(paso, respuestas) {
-  if (!paso) return false;
+function normalizarPayload(form) {
+  return {
+    ...form,
+    agencia: texto(form.agencia),
+    nombre_prospecto: texto(form.nombre_prospecto).toUpperCase(),
+    codigo_postal: soloNumeros(form.codigo_postal),
+    telefono: soloNumeros(form.telefono),
+    email: texto(form.email),
+    asesor_ventas: texto(form.asesor_ventas),
+    presupuesto_estimado: Number(soloNumeros(form.presupuesto_estimado) || 0),
+    enganche_presupuestado: Number(soloNumeros(form.enganche_presupuestado) || 0),
+    mensualidades_presupuestadas: Number(form.mensualidades_presupuestadas || 0),
+    edad: form.edad === "" ? null : Number(soloNumeros(form.edad) || 0),
+    cantidad_hijos: Number(soloNumeros(form.cantidad_hijos) || 0),
+    modelo_auto_cuenta: form.deja_auto_cuenta ? texto(form.modelo_auto_cuenta) : "",
+    pasatiempos: Array.isArray(form.pasatiempos) ? form.pasatiempos : [],
+    comentarios: texto(form.comentarios),
+  };
+}
 
-  const valor = respuestas[paso.id];
+function obtenerErrores(form) {
+  const errores = {};
 
-  if (paso.opcional && !String(valor || "").trim()) {
-    return true;
+  if (!texto(form.agencia)) errores.agencia = "Selecciona el dealer.";
+  if (!texto(form.nombre_prospecto)) errores.nombre_prospecto = "Captura el nombre del prospecto.";
+  if (!soloNumeros(form.codigo_postal)) errores.codigo_postal = "Captura un código postal numérico.";
+  if (!validarTelefono(form.telefono)) errores.telefono = mensajeTelefono(form.telefono);
+  if (!validarEmail(form.email)) errores.email = "Captura un correo electrónico válido.";
+  if (!texto(form.asesor_ventas)) errores.asesor_ventas = "Selecciona o captura un asesor de ventas.";
+  if (!form.motivo_ingreso) errores.motivo_ingreso = "Selecciona por qué ingresó a la agencia.";
+  if (!form.tiempo_compra) errores.tiempo_compra = "Selecciona cuándo tiene programada su compra.";
+  if (form.deja_auto_cuenta && !texto(form.modelo_auto_cuenta)) {
+    errores.modelo_auto_cuenta = "Captura el modelo que desea dejar a cuenta.";
+  }
+  if (!form.forma_capitalizacion) errores.forma_capitalizacion = "Selecciona una forma de capitalización.";
+  if (Number(soloNumeros(form.presupuesto_estimado) || 0) < 100000) {
+    errores.presupuesto_estimado = "El presupuesto debe tener al menos seis dígitos.";
+  }
+  if (Number(soloNumeros(form.enganche_presupuestado) || 0) < 10000) {
+    errores.enganche_presupuestado = "El enganche debe tener al menos cinco dígitos.";
+  }
+  if (!form.mensualidades_presupuestadas) {
+    errores.mensualidades_presupuestadas = "Selecciona mensualidades presupuestadas.";
+  }
+  if (!form.forma_comprobar_ingresos) {
+    errores.forma_comprobar_ingresos = "Selecciona la forma de comprobar ingresos.";
+  }
+  if (!form.motivo_compra) errores.motivo_compra = "Selecciona el motivo de compra.";
+  if (!form.perfil_profesional) errores.perfil_profesional = "Selecciona el perfil profesional.";
+  if (!form.estado_civil) errores.estado_civil = "Selecciona el estado civil.";
+  if (!Array.isArray(form.pasatiempos) || form.pasatiempos.length < 3) {
+    errores.pasatiempos = "Selecciona al menos 3 pasatiempos.";
   }
 
-  switch (paso.tipo) {
-    case "texto":
-      return String(valor || "").trim().length >= 2;
-
-    case "numero": {
-      const digitos = soloNumeros(valor);
-
-      if (!digitos && paso.opcional) return true;
-      if (!digitos) return false;
-
-      if (paso.id === "telefono") {
-        return validarTelefonoMx(digitos);
-      }
-
-      if (paso.id === "presupuesto_estimado") {
-        return Number(digitos) >= 100000;
-      }
-
-      if (paso.id === "enganche_presupuestado") {
-        return Number(digitos) >= 10000;
-      }
-
-      return true;
-    }
-
-    case "email":
-      return validarEmail(valor);
-
-    case "asesor":
-      return ASESORES.includes(valor);
-
-    case "opcion":
-      return Boolean(valor);
-
-    case "booleano":
-      return typeof valor === "boolean";
-
-    case "pasatiempos":
-      return Array.isArray(valor) && valor.length >= 3;
-
-    case "comentario":
-      return true;
-
-    default:
-      return false;
-  }
+  return errores;
 }
 
-function ayudaPaso(paso, respuestas) {
-  if (!paso) return "";
-  if (validarPaso(paso, respuestas)) return "";
-
-  const valor = respuestas[paso.id];
-
-  switch (paso.id) {
-    case "nombre_prospecto":
-      return "Capture el nombre completo del prospecto.";
-
-    case "codigo_postal":
-      return "Capture solo números.";
-
-    case "telefono":
-      return mensajeTelefono(valor);
-
-    case "email":
-      return "Capture un correo válido. Ejemplo: nombre@dominio.com";
-
-    case "asesor_ventas":
-      return "Seleccione un asesor de la lista.";
-
-    case "presupuesto_estimado":
-      return "El presupuesto debe tener al menos seis dígitos.";
-
-    case "enganche_presupuestado":
-      return "El enganche debe tener al menos cinco dígitos.";
-
-    case "pasatiempos":
-      return "Seleccione al menos 3 pasatiempos.";
-
-    default:
-      return "Este dato es requerido para continuar.";
-  }
-}
-function money(value) {
-  const n = Number(soloNumeros(value) || 0);
-  return n.toLocaleString("es-MX", {
-    style: "currency",
-    currency: "MXN",
-    maximumFractionDigits: 0,
-  });
-}
-
-function normalizarResumen(valor) {
-  if (Array.isArray(valor)) return valor.join(", ");
-  if (typeof valor === "boolean") return valor ? "SÍ" : "NO";
-  return String(valor || "No indicado");
-}
-
-function Encabezado({ progreso }) {
+function Campo({ label, icono: Icono, requerido, error, ayuda, children }) {
   return (
-    <div className="mb-8 text-center sm:mb-10">
-      <div className="mb-4 flex justify-center">
-        <span className="inline-flex items-center rounded-full border border-white bg-white/5 px-3 py-1 text-xs font-semibold tracking-wide text-white">
-          Automotriz R&amp;R
+    <div className="space-y-2">
+      <label className="flex items-center justify-between gap-3">
+        <span className="flex items-center gap-2 text-sm font-semibold text-white">
+          {Icono ? <Icono className="h-4 w-4" /> : null}
+          {label}
+          {requerido ? <b className="text-red-200">*</b> : null}
         </span>
+      </label>
+
+      {children}
+
+      {ayuda ? <p className="text-xs font-medium text-white/70">{ayuda}</p> : null}
+      {error ? <p className="text-xs font-bold text-red-200">{error}</p> : null}
+    </div>
+  );
+}
+
+function Input({ error, className = "", ...props }) {
+  return (
+    <input
+      {...props}
+      className={cls(
+        "w-full rounded-2xl border bg-white/10 px-4 py-3 text-sm font-semibold text-white outline-none transition placeholder:text-white/45",
+        error
+          ? "border-red-200 ring-4 ring-red-400/10"
+          : "border-white/15 focus:border-white/45 focus:ring-4 focus:ring-white/10",
+        props.disabled ? "cursor-not-allowed opacity-60" : "",
+        className,
+      )}
+    />
+  );
+}
+
+function Select({ error, children, className = "", ...props }) {
+  return (
+    <select
+      {...props}
+      className={cls(
+        "w-full rounded-2xl border bg-[#0b1b54]/90 px-4 py-3 text-sm font-semibold text-white outline-none transition",
+        error
+          ? "border-red-200 ring-4 ring-red-400/10"
+          : "border-white/15 focus:border-white/45 focus:ring-4 focus:ring-white/10",
+        className,
+      )}
+    >
+      {children}
+    </select>
+  );
+}
+
+function Textarea({ error, className = "", ...props }) {
+  return (
+    <textarea
+      {...props}
+      className={cls(
+        "min-h-[120px] w-full resize-none rounded-2xl border bg-white/10 px-4 py-3 text-sm font-semibold text-white outline-none transition placeholder:text-white/45",
+        error
+          ? "border-red-200 ring-4 ring-red-400/10"
+          : "border-white/15 focus:border-white/45 focus:ring-4 focus:ring-white/10",
+        className,
+      )}
+    />
+  );
+}
+
+function Seccion({ titulo, descripcion, icono: Icono, children }) {
+  return (
+    <section className="rounded-3xl border border-white/10 bg-[#06122f]/55 p-4 shadow-[0_22px_50px_-34px_rgba(0,0,0,0.75)] sm:p-5">
+      <div className="mb-5 flex items-start gap-3">
+        {Icono ? (
+          <div className="rounded-2xl border border-white/10 bg-white/10 p-3 text-white">
+            <Icono className="h-5 w-5" />
+          </div>
+        ) : null}
+
+        <div>
+          <h2 className="text-base font-bold text-white sm:text-lg">{titulo}</h2>
+          {descripcion ? <p className="mt-1 text-sm text-white/65">{descripcion}</p> : null}
+        </div>
       </div>
 
-      <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
-        Registro de tráfico de piso
-      </h1>
+      {children}
+    </section>
+  );
+}
 
-      <div className="mx-auto mt-6 h-2 max-w-xl overflow-hidden rounded-full bg-white/15">
-        <div
-          className="h-full rounded-full bg-white transition-all duration-300"
-          style={{ width: `${progreso}%` }}
+function ToggleSiNo({ value, onChange }) {
+  return (
+    <div className="grid grid-cols-2 rounded-2xl border border-white/15 bg-white/10 p-1">
+      <button
+        type="button"
+        onClick={() => onChange(true)}
+        className={cls(
+          "rounded-xl px-4 py-3 text-sm font-black transition",
+          value ? "bg-white text-[#131E5C]" : "text-white hover:bg-white/10",
+        )}
+      >
+        SÍ
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange(false)}
+        className={cls(
+          "rounded-xl px-4 py-3 text-sm font-black transition",
+          !value ? "bg-white text-[#131E5C]" : "text-white hover:bg-white/10",
+        )}
+      >
+        NO
+      </button>
+    </div>
+  );
+}
+
+function AsesorAutocomplete({ value, onChange, error }) {
+  const [abierto, setAbierto] = useState(false);
+
+  const opciones = useMemo(() => {
+    const q = normalizarBusqueda(value);
+    if (!q) return ASESORES.slice(0, 12);
+
+    return ASESORES.filter((asesor) => normalizarBusqueda(asesor).includes(q)).slice(0, 12);
+  }, [value]);
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/55" />
+        <Input
+          value={value}
+          error={error}
+          onFocus={() => setAbierto(true)}
+          onChange={(e) => {
+            onChange(e.target.value);
+            setAbierto(true);
+          }}
+          placeholder="Escribe para buscar asesor..."
+          className="pl-11"
         />
       </div>
-    </div>
-  );
-}
 
-function CabeceraPregunta({ paso, indice, total }) {
-  return (
-    <div className="mb-6 sm:mb-8">
-      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl lg:text-4xl">
-        {paso.titulo}
-      </h2>
-    </div>
-  );
-}
+      {abierto ? (
+        <div className="absolute left-0 right-0 z-30 mt-2 max-h-72 overflow-y-auto rounded-2xl border border-white/10 bg-[#07122f] p-2 shadow-2xl">
+          {opciones.length === 0 ? (
+            <button
+              type="button"
+              onClick={() => setAbierto(false)}
+              className="block w-full rounded-xl px-3 py-3 text-left text-sm font-semibold text-white/70 hover:bg-white/10"
+            >
+              No encontré coincidencias. Puedes dejar el nombre escrito manualmente.
+            </button>
+          ) : null}
 
-function PreguntaTexto({ paso, valor, onChange, onEnter }) {
-  const Icono = paso.icono || UserRound;
-
-  return (
-    <div className="rounded-2xl border border-white/10 p-4 shadow-[0_18px_45px_-30px_rgba(19,30,92,0.28)] sm:rounded-3xl sm:p-5 md:p-6">
-      <div className="mb-3 flex items-center gap-2 text-white">
-        <Icono className="h-4 w-4" />
-        <span className="text-sm font-medium">Captura</span>
-      </div>
-
-      <input
-        type="text"
-        value={valor}
-        onChange={(e) => {
-          const next = paso.mayusculas ? e.target.value.toUpperCase() : e.target.value;
-          onChange(next);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") onEnter();
-        }}
-        placeholder={paso.placeholder}
-        autoComplete="off"
-        className="w-full border-0 bg-transparent text-lg font-semibold text-white outline-none placeholder:text-slate-400 sm:text-2xl"
-      />
-    </div>
-  );
-}
-
-function PreguntaNumero({ paso, valor, onChange, onEnter }) {
-  const Icono = paso.icono || ClipboardList;
-  const mostrarMoneda = ["presupuesto_estimado", "enganche_presupuestado"].includes(paso.id);
-
-  return (
-    <div className="rounded-2xl border border-white/10 p-4 shadow-[0_18px_45px_-30px_rgba(19,30,92,0.28)] sm:rounded-3xl sm:p-5 md:p-6">
-      <div className="mb-3 flex items-center gap-2 text-white">
-        <Icono className="h-4 w-4" />
-        <span className="text-sm font-medium">Solo números</span>
-      </div>
-
-      <input
-        type="text"
-        inputMode="numeric"
-        value={valor}
-        maxLength={paso.maxLength || undefined}
-        onChange={(e) => onChange(soloNumeros(e.target.value).slice(0, paso.maxLength || 20))}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") onEnter();
-        }}
-        placeholder={paso.placeholder}
-        autoComplete="off"
-        className="w-full border-0 bg-transparent text-lg font-semibold text-white outline-none placeholder:text-slate-400 sm:text-2xl"
-      />
-
-      {mostrarMoneda && valor ? (
-        <p className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white">
-          Monto capturado: {money(valor)}
-        </p>
+          {opciones.map((asesor) => (
+            <button
+              key={asesor}
+              type="button"
+              onClick={() => {
+                onChange(asesor);
+                setAbierto(false);
+              }}
+              className="block w-full rounded-xl px-3 py-3 text-left text-sm font-bold text-white hover:bg-white/10"
+            >
+              {asesor}
+            </button>
+          ))}
+        </div>
       ) : null}
     </div>
   );
 }
 
-function PreguntaEmail({ paso, valor, onChange, onEnter }) {
-  const Icono = paso.icono || Mail;
-
-  return (
-    <div className="rounded-2xl border border-white/10 p-4 shadow-[0_18px_45px_-30px_rgba(19,30,92,0.28)] sm:rounded-3xl sm:p-5 md:p-6">
-      <div className="mb-3 flex items-center gap-2 text-white">
-        <Icono className="h-4 w-4" />
-        <span className="text-sm font-medium">Opcional</span>
-      </div>
-
-      <input
-        type="email"
-        value={valor}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") onEnter();
-        }}
-        placeholder={paso.placeholder}
-        autoComplete="off"
-        className="w-full border-0 bg-transparent text-lg font-semibold text-white outline-none placeholder:text-slate-400 sm:text-2xl"
-      />
-    </div>
-  );
-}
-
-function PreguntaOpciones({ paso, valor, onChange }) {
-  return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-      {paso.opciones.map((opcion) => {
-        const activo = String(valor) === String(opcion);
-
-        return (
-          <button
-            key={opcion}
-            type="button"
-            onClick={() => onChange(String(opcion))}
-            className={cls(
-              "rounded-2xl border p-4 text-left transition sm:p-5",
-              activo
-                ? "border-[#131E5C] bg-[#131E5C] font-bold text-white shadow-[0_14px_30px_-18px_rgba(19,30,92,0.65)]"
-                : "border-[#131E5C]/10 text-white font-bold hover:border-[#131E5C]/25 hover:bg-white/15",
-            )}
-          >
-            <div className="flex items-start gap-3">
-              <span
-                className={cls(
-                  "mt-1 h-2.5 w-2.5 shrink-0 rounded-full",
-                  activo ? "bg-white" : "bg-white/25",
-                )}
-              />
-              <p className="text-sm font-bold leading-6">{opcion}</p>
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function PreguntaBooleano({ valor, onChange }) {
-  return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-      {[
-        { label: "SÍ", value: true },
-        { label: "NO", value: false },
-      ].map((opcion) => {
-        const activo = valor === opcion.value;
-
-        return (
-          <button
-            key={opcion.label}
-            type="button"
-            onClick={() => onChange(opcion.value)}
-            className={cls(
-              "rounded-2xl border px-5 py-8 text-center transition",
-              activo
-                ? "border-[#131E5C] bg-[#131E5C] font-bold text-white shadow-[0_14px_30px_-18px_rgba(19,30,92,0.65)]"
-                : "border-[#131E5C]/10 text-white font-bold hover:border-[#131E5C]/25 hover:bg-white/15",
-            )}
-          >
-            <div className="text-3xl font-black">{opcion.label}</div>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function PreguntaAsesor({ valor, onChange }) {
-  const [busqueda, setBusqueda] = useState("");
-
-  const asesoresFiltrados = useMemo(() => {
-    const q = busqueda.trim().toLowerCase();
-    if (!q) return ASESORES;
-
-    return ASESORES.filter((asesor) => asesor.toLowerCase().includes(q));
-  }, [busqueda]);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
-        <Search className="h-4 w-4" />
-        <input
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Escriba para buscar al asesor..."
-          className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-white/60"
-        />
-      </div>
-
-      <div className="max-h-[420px] overflow-y-auto rounded-2xl border border-[#131E5C]/10 p-2 shadow-[0_18px_45px_-30px_rgba(19,30,92,0.22)] sm:rounded-3xl sm:p-3">
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-          {asesoresFiltrados.length > 0 ? (
-            asesoresFiltrados.map((asesor) => {
-              const activo = valor === asesor;
-
-              return (
-                <button
-                  key={asesor}
-                  type="button"
-                  onClick={() => onChange(asesor)}
-                  className={cls(
-                    "flex min-h-[58px] items-center gap-3 rounded-2xl border px-3 py-3 text-left font-bold transition sm:min-h-[64px]",
-                    activo
-                      ? "border-[#131E5C] bg-[#131E5C] text-white shadow-[0_14px_30px_-18px_rgba(19,30,92,0.65)]"
-                      : "border-[#131E5C]/10 text-white hover:border-[#131E5C]/25 hover:bg-white/15",
-                  )}
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 text-base font-bold leading-5">
-                      {asesor}
-                    </p>
-                  </div>
-
-                  {activo ? (
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-white" />
-                  ) : null}
-                </button>
-              );
-            })
-          ) : (
-            <div className="px-3 py-8 text-center text-sm text-white/70">
-              No se encontraron asesores con esa búsqueda.
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PreguntaPasatiempos({ valor, onChange }) {
-  const seleccionados = new Set(valor || []);
+function PasatiemposPicker({ value, onChange, error }) {
+  const seleccionados = new Set(value || []);
 
   function toggle(item) {
     if (seleccionados.has(item)) {
-      onChange((valor || []).filter((x) => x !== item));
+      onChange((value || []).filter((x) => x !== item));
       return;
     }
 
-    onChange([...(valor || []), item]);
+    onChange([...(value || []), item]);
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
-        <div className="flex items-center gap-2">
-          <HeartHandshake className="h-4 w-4" />
-          <span className="text-sm font-bold">Selección múltiple</span>
-        </div>
-        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#131E5C]">
-          {(valor || []).length}/3 mínimos
+    <div className="space-y-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm font-semibold text-white">Selecciona al menos 3 pasatiempos</p>
+
+        <span
+          className={cls(
+            "w-fit rounded-full border px-3 py-1 text-xs font-black",
+            value.length >= 3
+              ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-100"
+              : "border-amber-300/40 bg-amber-400/15 text-amber-100",
+          )}
+        >
+          {value.length}/3 mínimos
         </span>
       </div>
 
-      <div className="flex max-h-[430px] flex-wrap gap-2 overflow-y-auto rounded-2xl border border-white/10 p-3 sm:rounded-3xl">
+      <div className="flex max-h-[260px] flex-wrap gap-2 overflow-y-auto pr-1">
         {PASATIEMPOS.map((item) => {
           const activo = seleccionados.has(item);
 
@@ -845,10 +522,10 @@ function PreguntaPasatiempos({ valor, onChange }) {
               type="button"
               onClick={() => toggle(item)}
               className={cls(
-                "rounded-full border px-4 py-3 text-sm font-bold transition",
+                "rounded-full border px-3 py-2 text-xs font-black transition",
                 activo
-                  ? "border-[#131E5C] bg-[#131E5C] text-white"
-                  : "border-white/15 bg-white/5 text-white hover:bg-white/15",
+                  ? "border-white bg-white text-[#131E5C]"
+                  : "border-white/15 bg-white/10 text-white hover:bg-white/20",
               )}
             >
               {item}
@@ -856,335 +533,73 @@ function PreguntaPasatiempos({ valor, onChange }) {
           );
         })}
       </div>
+
+      {error ? <p className="text-xs font-bold text-red-200">{error}</p> : null}
     </div>
-  );
-}
-
-function PreguntaComentario({ paso, valor, onChange }) {
-  return (
-    <div className="rounded-2xl border border-white/10 p-4 shadow-[0_18px_45px_-30px_rgba(19,30,92,0.28)] sm:rounded-3xl sm:p-5 md:p-6">
-      <div className="mb-3 flex items-center gap-2 text-white">
-        <MessageSquareText className="h-4 w-4" />
-        <span className="text-sm font-medium">Comentario opcional</span>
-      </div>
-
-      <textarea
-        rows={6}
-        value={valor}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={paso.placeholder}
-        className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 p-4 text-white outline-none transition placeholder:text-white/60 focus:border-white/40 focus:ring-4 focus:ring-[#131E5C]/8"
-      />
-
-      <p className="mt-3 text-sm text-white">
-        Puede dejar este campo vacío si no hay notas adicionales.
-      </p>
-    </div>
-  );
-}
-
-function PantallaFinal({ respuestas, onRestart }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="py-2 text-center"
-    >
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#131E5C]/10 text-white">
-        <CheckCircle2 className="h-8 w-8" />
-      </div>
-
-      <h2 className="mt-5 text-3xl font-semibold tracking-tight text-white">
-        Registro guardado correctamente
-      </h2>
-
-      <div className="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-3 text-left sm:grid-cols-2 lg:grid-cols-3">
-        {[
-          ["Agencia", respuestas.agencia],
-          ["Prospecto", respuestas.nombre_prospecto],
-          ["Teléfono", respuestas.telefono],
-          ["Asesor", respuestas.asesor_ventas],
-          ["Compra", respuestas.tiempo_compra],
-          ["Capitalización", respuestas.forma_capitalizacion],
-          ["Presupuesto", money(respuestas.presupuesto_estimado)],
-          ["Enganche", money(respuestas.enganche_presupuestado)],
-          ["Auto a cuenta", respuestas.deja_auto_cuenta],
-        ].map(([label, value]) => (
-          <div key={label} className="rounded-2xl border border-white/10 p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-white/75">
-              {label}
-            </p>
-            <p className="mt-2 text-sm font-semibold text-white">
-              {normalizarResumen(value)}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      <button
-        type="button"
-        onClick={onRestart}
-        className="mt-8 inline-flex w-full items-center justify-center rounded-2xl border border-[#131E5C] bg-white px-5 py-3 text-sm font-semibold text-[#131E5C] transition hover:bg-[#131E5C] hover:text-white sm:w-auto"
-      >
-        Registrar otro ingreso
-      </button>
-    </motion.div>
   );
 }
 
 export default function App() {
-  const [respuestas, setRespuestas] = useState(respuestasIniciales);
-  const [indiceActual, setIndiceActual] = useState(0);
-  const [direccion, setDireccion] = useState(1);
-  const [finalizada, setFinalizada] = useState(false);
+  const [form, setForm] = useState(FORM_INICIAL);
   const [enviando, setEnviando] = useState(false);
-  const [errorEnvio, setErrorEnvio] = useState("");
+  const [mostrarErrores, setMostrarErrores] = useState(false);
+  const [mensaje, setMensaje] = useState("");
+  const [guardado, setGuardado] = useState(false);
 
-  const timeoutAvanceRef = useRef(null);
+  const errores = useMemo(() => obtenerErrores(form), [form]);
+  const hayErrores = Object.keys(errores).length > 0;
 
-  const pasosVisibles = useMemo(() => {
-    return PASOS.filter((paso) => {
-      if (typeof paso.condicional !== "function") return true;
-      return paso.condicional(respuestas);
-    });
-  }, [respuestas]);
+  function updateField(campo, valor) {
+    setForm((prev) => ({ ...prev, [campo]: valor }));
+    setGuardado(false);
+  }
 
-  const pasoActual = pasosVisibles[indiceActual] || pasosVisibles[pasosVisibles.length - 1];
-  const puedeContinuar = validarPaso(pasoActual, respuestas);
-  const ayuda = ayudaPaso(pasoActual, respuestas);
-  const progreso = pasosVisibles.length
-    ? Math.round(((indiceActual + 1) / pasosVisibles.length) * 100)
-    : 0;
+  async function enviarFormulario(e) {
+    e.preventDefault();
+    setMostrarErrores(true);
+    setMensaje("");
+    setGuardado(false);
 
-  useEffect(() => {
-    const guardado = localStorage.getItem(STORAGE_KEY);
-    if (!guardado) return;
+    const erroresActuales = obtenerErrores(form);
+
+    if (Object.keys(erroresActuales).length > 0) {
+      setMensaje(Object.values(erroresActuales)[0]);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
 
     try {
-      const datos = JSON.parse(guardado);
+      setEnviando(true);
+      await crearTraficoPiso(normalizarPayload(form));
 
-      setRespuestas({ ...respuestasIniciales, ...(datos.respuestas || {}) });
-      setIndiceActual(typeof datos.indiceActual === "number" ? datos.indiceActual : 0);
-      setFinalizada(Boolean(datos.finalizada));
+      setGuardado(true);
+      setMensaje("Registro guardado correctamente.");
+      setForm(FORM_INICIAL);
+      setMostrarErrores(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
-      console.error("No se pudieron restaurar los datos:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (indiceActual > pasosVisibles.length - 1) {
-      setIndiceActual(Math.max(pasosVisibles.length - 1, 0));
-    }
-  }, [indiceActual, pasosVisibles.length]);
-
-  useEffect(() => {
-    if (!respuestas.deja_auto_cuenta && respuestas.modelo_auto_cuenta) {
-      setRespuestas((prev) => ({ ...prev, modelo_auto_cuenta: "" }));
-    }
-  }, [respuestas.deja_auto_cuenta, respuestas.modelo_auto_cuenta]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        respuestas,
-        indiceActual,
-        finalizada,
-      }),
-    );
-  }, [respuestas, indiceActual, finalizada]);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutAvanceRef.current) clearTimeout(timeoutAvanceRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    preloadImages([fondo4]);
-  }, []);
-
-  function actualizarRespuesta(campo, valor) {
-    setErrorEnvio("");
-    setRespuestas((prev) => ({
-      ...prev,
-      [campo]: valor,
-    }));
-  }
-
-  function siguiente() {
-    if (!puedeContinuar) return;
-    if (indiceActual >= pasosVisibles.length - 1) return;
-
-    if (timeoutAvanceRef.current) clearTimeout(timeoutAvanceRef.current);
-
-    setDireccion(1);
-    setIndiceActual((prev) => prev + 1);
-  }
-
-  function anterior() {
-    if (indiceActual <= 0) return;
-
-    if (timeoutAvanceRef.current) clearTimeout(timeoutAvanceRef.current);
-
-    setDireccion(-1);
-    setIndiceActual((prev) => prev - 1);
-  }
-
-  function manejarSeleccionConAvance(campo, valor) {
-    actualizarRespuesta(campo, valor);
-
-    if (enviando) return;
-    if (indiceActual >= pasosVisibles.length - 1) return;
-
-    if (timeoutAvanceRef.current) clearTimeout(timeoutAvanceRef.current);
-
-    timeoutAvanceRef.current = setTimeout(() => {
-      setDireccion(1);
-      setIndiceActual((prev) => {
-        if (prev >= pasosVisibles.length - 1) return prev;
-        return prev + 1;
-      });
-    }, 180);
-  }
-
-  function reiniciarFormulario() {
-    if (timeoutAvanceRef.current) clearTimeout(timeoutAvanceRef.current);
-
-    localStorage.removeItem(STORAGE_KEY);
-    setRespuestas(respuestasIniciales);
-    setIndiceActual(0);
-    setDireccion(1);
-    setFinalizada(false);
-    setEnviando(false);
-    setErrorEnvio("");
-  }
-
-  async function finalizarRegistro() {
-    if (enviando) return;
-    if (!puedeContinuar) return;
-
-    setEnviando(true);
-    setErrorEnvio("");
-
-    try {
-      await crearTraficoPiso(respuestas);
-      localStorage.removeItem(STORAGE_KEY);
-      setFinalizada(true);
-    } catch (error) {
-      console.error("Error al guardar tráfico de piso:", error);
-      setErrorEnvio(
-        error.message || "Ocurrió un error al guardar el tráfico de piso.",
-      );
+      console.error(error);
+      setMensaje(error.message || "No fue posible guardar el registro.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setEnviando(false);
     }
   }
 
-  function renderPregunta() {
-    switch (pasoActual.tipo) {
-      case "texto":
-        return (
-          <PreguntaTexto
-            paso={pasoActual}
-            valor={respuestas[pasoActual.id]}
-            onChange={(valor) => actualizarRespuesta(pasoActual.id, valor)}
-            onEnter={siguiente}
-          />
-        );
-
-      case "numero":
-        return (
-          <PreguntaNumero
-            paso={pasoActual}
-            valor={respuestas[pasoActual.id]}
-            onChange={(valor) => actualizarRespuesta(pasoActual.id, valor)}
-            onEnter={siguiente}
-          />
-        );
-
-      case "email":
-        return (
-          <PreguntaEmail
-            paso={pasoActual}
-            valor={respuestas[pasoActual.id]}
-            onChange={(valor) => actualizarRespuesta(pasoActual.id, valor)}
-            onEnter={siguiente}
-          />
-        );
-
-      case "asesor":
-        return (
-          <PreguntaAsesor
-            valor={respuestas[pasoActual.id]}
-            onChange={(valor) => manejarSeleccionConAvance(pasoActual.id, valor)}
-          />
-        );
-
-      case "opcion":
-        return (
-          <PreguntaOpciones
-            paso={pasoActual}
-            valor={respuestas[pasoActual.id]}
-            onChange={(valor) => manejarSeleccionConAvance(pasoActual.id, valor)}
-          />
-        );
-
-      case "booleano":
-        return (
-          <PreguntaBooleano
-            valor={respuestas[pasoActual.id]}
-            onChange={(valor) => manejarSeleccionConAvance(pasoActual.id, valor)}
-          />
-        );
-
-      case "pasatiempos":
-        return (
-          <PreguntaPasatiempos
-            valor={respuestas[pasoActual.id]}
-            onChange={(valor) => actualizarRespuesta(pasoActual.id, valor)}
-          />
-        );
-
-      case "comentario":
-        return (
-          <PreguntaComentario
-            paso={pasoActual}
-            valor={respuestas[pasoActual.id]}
-            onChange={(valor) => actualizarRespuesta(pasoActual.id, valor)}
-          />
-        );
-
-      default:
-        return null;
-    }
+  function error(campo) {
+    return mostrarErrores ? errores[campo] : "";
   }
-
-  function preloadImages(images = []) {
-    images.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-    });
-  }
-
-  const mostrarBotonContinuarManual = [
-    "texto",
-    "numero",
-    "email",
-    "pasatiempos",
-    "comentario",
-  ].includes(pasoActual.tipo);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#131e5c]">
-      <div className="absolute inset-0">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#131e5c]">
+      <div className="fixed inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(44,91,187,0.24),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.10),_transparent_28%)]" />
-        <div className="absolute left-[-12%] top-[-8%] rounded-full bg-[#2A63FF]/10 blur-3xl" />
-        <div className="absolute bottom-[-12%] right-[-10%] rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute left-[-12%] top-[-8%] h-72 w-72 rounded-full bg-[#2A63FF]/10 blur-3xl" />
+        <div className="absolute bottom-[-12%] right-[-10%] h-72 w-72 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(6,16,45,0.96),rgba(11,31,94,0.92),rgba(7,16,38,0.98))]" />
       </div>
 
-      <div className="mx-auto flex min-h-screen w-full max-w-7xl items-center justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1197,96 +612,462 @@ export default function App() {
             backgroundRepeat: "no-repeat",
           }}
         >
-          <div className="absolute inset-0 bg-[#131e5c]/20" />
+          <div className="absolute inset-0 bg-[#071126]/55" />
 
           <div className="relative z-10">
-            {finalizada ? (
-              <PantallaFinal respuestas={respuestas} onRestart={reiniciarFormulario} />
-            ) : (
-              <>
-                <CabeceraPregunta
-                  paso={pasoActual}
-                  indice={indiceActual}
-                  total={pasosVisibles.length}
-                />
+            <header className="mb-6 text-center sm:mb-8">
+              <div className="mb-4 flex justify-center">
+                <span className="inline-flex items-center rounded-full border border-white bg-white/5 px-3 py-1 text-xs font-semibold tracking-wide text-white">
+                  Automotriz R&amp;R
+                </span>
+              </div>
 
-                <AnimatePresence mode="wait" custom={direccion}>
-                  <motion.div
-                    key={pasoActual.id}
-                    custom={direccion}
-                    initial={{ opacity: 0, x: direccion > 0 ? 22 : -22 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: direccion > 0 ? -22 : 22 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {renderPregunta()}
-                  </motion.div>
-                </AnimatePresence>
+              <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
+                Registro de tráfico de piso
+              </h1>
+            </header>
 
+            {mensaje ? (
+              <div
+                className={cls(
+                  "mb-5 rounded-2xl border px-4 py-3 text-sm font-bold",
+                  guardado
+                    ? "border-emerald-200/30 bg-emerald-400/15 text-emerald-100"
+                    : "border-red-200/30 bg-red-400/15 text-red-100",
+                )}
+              >
+                {mensaje}
+              </div>
+            ) : null}
 
-                {errorEnvio ? (
-                  <div className="mt-4 rounded-2xl border border-red-300/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-white">
-                    {errorEnvio}
+            <form onSubmit={enviarFormulario} className="space-y-5">
+              <div className="space-y-5">
+                <Seccion
+                  titulo="Datos generales"
+                  icono={UserRound}
+                >
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <Campo label="Dealer" icono={Building2} requerido error={error("agencia")}>
+                      <Select
+                        value={form.agencia}
+                        error={error("agencia")}
+                        onChange={(e) => updateField("agencia", e.target.value)}
+                      >
+                        <option value="">Seleccionar dealer...</option>
+                        {AGENCIAS.map((agencia) => (
+                          <option key={agencia} value={agencia}>
+                            {agencia}
+                          </option>
+                        ))}
+                      </Select>
+                    </Campo>
+
+                    <Campo
+                      label="Nombre del prospecto"
+                      icono={UserRound}
+                      requerido
+                      error={error("nombre_prospecto")}
+                    >
+                      <Input
+                        value={form.nombre_prospecto}
+                        error={error("nombre_prospecto")}
+                        onChange={(e) => updateField("nombre_prospecto", e.target.value.toUpperCase())}
+                        placeholder="NOMBRE COMPLETO"
+                      />
+                    </Campo>
+
+                    <Campo
+                      label="Código postal"
+                      icono={ClipboardList}
+                      requerido
+                      error={error("codigo_postal")}
+                    >
+                      <Input
+                        value={form.codigo_postal}
+                        error={error("codigo_postal")}
+                        onChange={(e) => updateField("codigo_postal", soloNumeros(e.target.value).slice(0, 5))}
+                        inputMode="numeric"
+                        placeholder="68300"
+                      />
+                    </Campo>
+
+                    <Campo
+                      label="Teléfono"
+                      icono={Phone}
+                      requerido
+                      error={error("telefono")}
+                      ayuda="Formatos válidos: 10 dígitos 2711234567 o 12 dígitos 522713943324."
+                    >
+                      <Input
+                        value={form.telefono}
+                        error={error("telefono")}
+                        onChange={(e) => updateField("telefono", soloNumeros(e.target.value).slice(0, 12))}
+                        inputMode="numeric"
+                        placeholder="2711234567"
+                      />
+                    </Campo>
+
+                    <Campo label="E-mail" icono={Mail} error={error("email")}>
+                      <Input
+                        type="email"
+                        value={form.email}
+                        error={error("email")}
+                        onChange={(e) => updateField("email", e.target.value)}
+                        placeholder="correo@dominio.com"
+                      />
+                    </Campo>
+
+                    <Campo
+                      label="Asesor de ventas"
+                      icono={Search}
+                      requerido
+                      error={error("asesor_ventas")}
+                    >
+                      <AsesorAutocomplete
+                        value={form.asesor_ventas}
+                        error={error("asesor_ventas")}
+                        onChange={(valor) => updateField("asesor_ventas", valor)}
+                      />
+                    </Campo>
+
+                    <Campo
+                      label="Ingresó a la agencia porque"
+                      icono={MessageSquareText}
+                      requerido
+                      error={error("motivo_ingreso")}
+                    >
+                      <Select
+                        value={form.motivo_ingreso}
+                        error={error("motivo_ingreso")}
+                        onChange={(e) => updateField("motivo_ingreso", e.target.value)}
+                      >
+                        <option value="">Seleccionar...</option>
+                        {MOTIVOS_INGRESO.map((opcion) => (
+                          <option key={opcion} value={opcion}>
+                            {opcion}
+                          </option>
+                        ))}
+                      </Select>
+                    </Campo>
+
+                    <Campo label="Tipo de persona" icono={Users} requerido>
+                      <div className="grid grid-cols-2 rounded-2xl border border-white/15 bg-white/10 p-1">
+                        {TIPOS_PERSONA.map((tipo) => (
+                          <button
+                            key={tipo}
+                            type="button"
+                            onClick={() => updateField("tipo_persona", tipo)}
+                            className={cls(
+                              "rounded-xl px-4 py-3 text-sm font-black transition",
+                              form.tipo_persona === tipo
+                                ? "bg-white text-[#131E5C]"
+                                : "text-white hover:bg-white/10",
+                            )}
+                          >
+                            {tipo}
+                          </button>
+                        ))}
+                      </div>
+                    </Campo>
                   </div>
-                ) : null}
+                </Seccion>
 
-                <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <button
-                    type="button"
-                    onClick={anterior}
-                    disabled={indiceActual === 0 || enviando}
-                    className={cls(
-                      "inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold transition sm:w-auto",
-                      indiceActual === 0 || enviando
-                        ? "cursor-not-allowed border border-white/10 bg-slate-100 text-slate-400"
-                        : "border border-[#131E5C]/20 bg-white text-[#131E5C] hover:border-white hover:bg-[#131E5C]/5 hover:text-white",
-                    )}
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Regresar
-                  </button>
+                <Seccion
+                  titulo="Intención de compra"
+                  icono={CarFront}
+                >
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <Campo
+                      label="¿Cuándo tiene programado comprar?"
+                      icono={CalendarDays}
+                      requerido
+                      error={error("tiempo_compra")}
+                    >
+                      <Select
+                        value={form.tiempo_compra}
+                        error={error("tiempo_compra")}
+                        onChange={(e) => updateField("tiempo_compra", e.target.value)}
+                      >
+                        <option value="">Seleccionar...</option>
+                        {TIEMPOS_COMPRA.map((opcion) => (
+                          <option key={opcion} value={opcion}>
+                            {opcion}
+                          </option>
+                        ))}
+                      </Select>
+                    </Campo>
 
-                  {mostrarBotonContinuarManual ? (
+                    <Campo label="¿Deja auto a cuenta?" icono={CarFront} requerido>
+                      <ToggleSiNo
+                        value={form.deja_auto_cuenta}
+                        onChange={(valor) => updateField("deja_auto_cuenta", valor)}
+                      />
+                    </Campo>
+
+                    <Campo
+                      label="Modelo de auto a cuenta"
+                      icono={CarFront}
+                      requerido={form.deja_auto_cuenta}
+                      error={error("modelo_auto_cuenta")}
+                    >
+                      <Input
+                        value={form.modelo_auto_cuenta}
+                        error={error("modelo_auto_cuenta")}
+                        disabled={!form.deja_auto_cuenta}
+                        onChange={(e) => updateField("modelo_auto_cuenta", e.target.value)}
+                        placeholder="Ej. Jetta 2020"
+                      />
+                    </Campo>
+
+                    <Campo
+                      label="Forma de capitalización"
+                      icono={CircleDollarSign}
+                      requerido
+                      error={error("forma_capitalizacion")}
+                    >
+                      <Select
+                        value={form.forma_capitalizacion}
+                        error={error("forma_capitalizacion")}
+                        onChange={(e) => updateField("forma_capitalizacion", e.target.value)}
+                      >
+                        <option value="">Seleccionar...</option>
+                        {FORMAS_CAPITALIZACION.map((opcion) => (
+                          <option key={opcion} value={opcion}>
+                            {opcion}
+                          </option>
+                        ))}
+                      </Select>
+                    </Campo>
+
+                    <Campo
+                      label="Presupuesto estimado"
+                      icono={BadgeDollarSign}
+                      requerido
+                      error={error("presupuesto_estimado")}
+                      ayuda="Debe tener al menos 6 dígitos."
+                    >
+                      <Input
+                        value={form.presupuesto_estimado}
+                        error={error("presupuesto_estimado")}
+                        onChange={(e) => updateField("presupuesto_estimado", soloNumeros(e.target.value))}
+                        inputMode="numeric"
+                        placeholder="300000"
+                      />
+                    </Campo>
+
+                    <Campo
+                      label="Enganche presupuestado"
+                      icono={BadgeDollarSign}
+                      requerido
+                      error={error("enganche_presupuestado")}
+                      ayuda="Debe tener al menos 5 dígitos."
+                    >
+                      <Input
+                        value={form.enganche_presupuestado}
+                        error={error("enganche_presupuestado")}
+                        onChange={(e) => updateField("enganche_presupuestado", soloNumeros(e.target.value))}
+                        inputMode="numeric"
+                        placeholder="50000"
+                      />
+                    </Campo>
+
+                    <Campo
+                      label="Mensualidades"
+                      icono={CalendarDays}
+                      requerido
+                      error={error("mensualidades_presupuestadas")}
+                    >
+                      <Select
+                        value={form.mensualidades_presupuestadas}
+                        error={error("mensualidades_presupuestadas")}
+                        onChange={(e) => updateField("mensualidades_presupuestadas", e.target.value)}
+                      >
+                        <option value="">Seleccionar...</option>
+                        {MENSUALIDADES.map((opcion) => (
+                          <option key={opcion} value={opcion}>
+                            {opcion}
+                          </option>
+                        ))}
+                      </Select>
+                    </Campo>
+                  </div>
+                </Seccion>
+
+                <Seccion
+                  titulo="Perfil financiero"
+                  icono={ShieldCheck}
+                >
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <Campo label="Comprobación de ingresos" icono={ShieldCheck} requerido>
+                      <ToggleSiNo
+                        value={form.comprueba_ingresos}
+                        onChange={(valor) => updateField("comprueba_ingresos", valor)}
+                      />
+                    </Campo>
+
+                    <Campo
+                      label="Forma de comprobar ingresos"
+                      icono={ClipboardList}
+                      requerido
+                      error={error("forma_comprobar_ingresos")}
+                    >
+                      <Select
+                        value={form.forma_comprobar_ingresos}
+                        error={error("forma_comprobar_ingresos")}
+                        onChange={(e) => updateField("forma_comprobar_ingresos", e.target.value)}
+                      >
+                        {FORMAS_COMPROBAR_INGRESOS.map((opcion) => (
+                          <option key={opcion} value={opcion}>
+                            {opcion}
+                          </option>
+                        ))}
+                      </Select>
+                    </Campo>
+                  </div>
+                </Seccion>
+
+                <Seccion
+                  titulo="Perfil del prospecto"
+                  icono={BriefcaseBusiness}
+                >
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <Campo
+                      label="Motivo de compra"
+                      icono={MessageSquareText}
+                      requerido
+                      error={error("motivo_compra")}
+                    >
+                      <Select
+                        value={form.motivo_compra}
+                        error={error("motivo_compra")}
+                        onChange={(e) => updateField("motivo_compra", e.target.value)}
+                      >
+                        <option value="">Seleccionar...</option>
+                        {MOTIVOS_COMPRA.map((opcion) => (
+                          <option key={opcion} value={opcion}>
+                            {opcion}
+                          </option>
+                        ))}
+                      </Select>
+                    </Campo>
+
+                    <Campo
+                      label="Perfil profesional"
+                      icono={BriefcaseBusiness}
+                      requerido
+                      error={error("perfil_profesional")}
+                    >
+                      <Select
+                        value={form.perfil_profesional}
+                        error={error("perfil_profesional")}
+                        onChange={(e) => updateField("perfil_profesional", e.target.value)}
+                      >
+                        <option value="">Seleccionar...</option>
+                        {PERFILES_PROFESIONALES.map((opcion) => (
+                          <option key={opcion} value={opcion}>
+                            {opcion}
+                          </option>
+                        ))}
+                      </Select>
+                    </Campo>
+
+                    <Campo
+                      label="Estado civil"
+                      icono={Users}
+                      requerido
+                      error={error("estado_civil")}
+                    >
+                      <Select
+                        value={form.estado_civil}
+                        error={error("estado_civil")}
+                        onChange={(e) => updateField("estado_civil", e.target.value)}
+                      >
+                        <option value="">Seleccionar...</option>
+                        {ESTADOS_CIVILES.map((opcion) => (
+                          <option key={opcion} value={opcion}>
+                            {opcion}
+                          </option>
+                        ))}
+                      </Select>
+                    </Campo>
+
+                    <Campo label="Edad" icono={UserRound}>
+                      <Input
+                        value={form.edad}
+                        onChange={(e) => updateField("edad", soloNumeros(e.target.value).slice(0, 3))}
+                        inputMode="numeric"
+                        placeholder="35"
+                      />
+                    </Campo>
+
+                    <Campo label="Cantidad de hijos" icono={Users}>
+                      <Input
+                        value={form.cantidad_hijos}
+                        onChange={(e) => updateField("cantidad_hijos", soloNumeros(e.target.value).slice(0, 2))}
+                        inputMode="numeric"
+                        placeholder="0"
+                      />
+                    </Campo>
+                  </div>
+
+                  <div className="mt-5">
+                    <Campo
+                      label="Pasatiempos"
+                      icono={HeartHandshake}
+                      requerido
+                      error={error("pasatiempos")}
+                    >
+                      <PasatiemposPicker
+                        value={form.pasatiempos}
+                        error={error("pasatiempos")}
+                        onChange={(valor) => updateField("pasatiempos", valor)}
+                      />
+                    </Campo>
+                  </div>
+
+                  <div className="mt-5">
+                    <Campo label="Comentarios" icono={MessageSquareText}>
+                      <Textarea
+                        value={form.comentarios}
+                        onChange={(e) => updateField("comentarios", e.target.value)}
+                        placeholder="Notas adicionales del asesor..."
+                      />
+                    </Campo>
+                  </div>
+                </Seccion>
+
+                <div className="sticky bottom-3 z-20 rounded-3xl border border-white/10 bg-[#06122f]/85 p-4 shadow-2xl backdrop-blur-xl">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm font-semibold text-white/70">
+                      {mostrarErrores && hayErrores
+                        ? Object.values(errores)[0]
+                        : "Revisa la información antes de guardar."}
+                    </p>
+
                     <button
-                      type="button"
-                      onClick={
-                        indiceActual === pasosVisibles.length - 1
-                          ? finalizarRegistro
-                          : siguiente
-                      }
-                      disabled={enviando || !puedeContinuar}
-                      className={cls(
-                        "inline-flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold transition sm:w-auto",
-                        enviando || !puedeContinuar
-                          ? "cursor-not-allowed bg-white/45 font-bold text-white"
-                          : "bg-white/80 font-bold text-[#131e5c] hover:bg-white",
-                      )}
+                      type="submit"
+                      disabled={enviando}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-black text-[#131E5C] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                     >
                       {enviando ? (
                         <>
-                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          <Loader2 className="h-4 w-4 animate-spin" />
                           Guardando...
                         </>
-                      ) : indiceActual === pasosVisibles.length - 1 ? (
-                        "Guardar tráfico de piso"
                       ) : (
                         <>
-                          Continuar
-                          <ArrowRight className="h-4 w-4" />
+                          <CheckCircle2 className="h-4 w-4" />
+                          Guardar
                         </>
                       )}
                     </button>
-                  ) : (
-                    <div className="w-full rounded-2xl border border-[#131E5C]/10 bg-[#131E5C]/5 px-4 py-3 text-center text-sm text-white sm:w-auto sm:text-left">
-                      Seleccione una opción para continuar automáticamente.
-                    </div>
-                  )}
+                  </div>
                 </div>
-              </>
-            )}
+              </div>
+            </form>
           </div>
         </motion.div>
-      </div>
+      </main>
     </div>
   );
 }
