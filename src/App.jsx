@@ -309,22 +309,21 @@ function obtenerErrores(form) {
 
   return errores;
 }
-
-function Campo({ label, icono: Icono, requerido, error, ayuda, children }) {
+function Campo({ label, icono: Icono, requerido, error, ayuda, children, className = "" }) {
   return (
-    <div className="space-y-2">
-      <label className="flex items-center justify-between gap-3">
-        <span className="flex items-center gap-2 text-sm font-semibold text-white">
-          {Icono ? <Icono className="h-4 w-4" /> : null}
+    <div className={cls("space-y-1.5", className)}>
+      <label className="flex items-center gap-1.5 text-[12px] font-semibold text-white/90">
+        {Icono ? <Icono className="h-3.5 w-3.5 text-white/75" /> : null}
+        <span className="leading-tight">
           {label}
-          {requerido ? <b className="text-red-200">*</b> : null}
+          {requerido ? <b className="ml-1 text-red-200">*</b> : null}
         </span>
       </label>
 
       {children}
 
-      {ayuda ? <p className="text-xs font-medium text-white/70">{ayuda}</p> : null}
-      {error ? <p className="text-xs font-bold text-red-200">{error}</p> : null}
+      {ayuda ? <p className="text-[11px] leading-snug text-white/60">{ayuda}</p> : null}
+      {error ? <p className="text-[11px] font-bold leading-snug text-red-200">{error}</p> : null}
     </div>
   );
 }
@@ -334,11 +333,11 @@ function Input({ error, className = "", ...props }) {
     <input
       {...props}
       className={cls(
-        "w-full rounded-2xl border bg-white/10 px-4 py-3 text-sm font-semibold text-white outline-none transition placeholder:text-white/45",
+        "h-10 w-full rounded-xl border bg-white/10 px-3 text-sm font-semibold text-white outline-none transition placeholder:text-white/40",
         error
-          ? "border-red-200 ring-4 ring-red-400/10"
-          : "border-white/15 focus:border-white/45 focus:ring-4 focus:ring-white/10",
-        props.disabled ? "cursor-not-allowed opacity-60" : "",
+          ? "border-red-200 ring-2 ring-red-400/10"
+          : "border-white/15 focus:border-white/45 focus:ring-2 focus:ring-white/10",
+        props.disabled ? "cursor-not-allowed opacity-50" : "",
         className,
       )}
     />
@@ -350,10 +349,10 @@ function Select({ error, children, className = "", ...props }) {
     <select
       {...props}
       className={cls(
-        "w-full rounded-2xl border bg-[#0b1b54]/90 px-4 py-3 text-sm font-semibold text-white outline-none transition",
+        "h-10 w-full rounded-xl border bg-[#0b1b54]/90 px-3 text-sm font-semibold text-white outline-none transition",
         error
-          ? "border-red-200 ring-4 ring-red-400/10"
-          : "border-white/15 focus:border-white/45 focus:ring-4 focus:ring-white/10",
+          ? "border-red-200 ring-2 ring-red-400/10"
+          : "border-white/15 focus:border-white/45 focus:ring-2 focus:ring-white/10",
         className,
       )}
     >
@@ -367,45 +366,24 @@ function Textarea({ error, className = "", ...props }) {
     <textarea
       {...props}
       className={cls(
-        "min-h-[120px] w-full resize-none rounded-2xl border bg-white/10 px-4 py-3 text-sm font-semibold text-white outline-none transition placeholder:text-white/45",
+        "min-h-[74px] w-full resize-none rounded-xl border bg-white/10 px-3 py-2 text-sm font-semibold text-white outline-none transition placeholder:text-white/40",
         error
-          ? "border-red-200 ring-4 ring-red-400/10"
-          : "border-white/15 focus:border-white/45 focus:ring-4 focus:ring-white/10",
+          ? "border-red-200 ring-2 ring-red-400/10"
+          : "border-white/15 focus:border-white/45 focus:ring-2 focus:ring-white/10",
         className,
       )}
     />
   );
 }
 
-function Seccion({ titulo, descripcion, icono: Icono, children }) {
-  return (
-    <section className="rounded-3xl border border-white/10 bg-[#06122f]/55 p-4 shadow-[0_22px_50px_-34px_rgba(0,0,0,0.75)] sm:p-5">
-      <div className="mb-5 flex items-start gap-3">
-        {Icono ? (
-          <div className="rounded-2xl border border-white/10 bg-white/10 p-3 text-white">
-            <Icono className="h-5 w-5" />
-          </div>
-        ) : null}
-
-        <div>
-          <h2 className="text-base font-bold text-white sm:text-lg">{titulo}</h2>
-          {descripcion ? <p className="mt-1 text-sm text-white/65">{descripcion}</p> : null}
-        </div>
-      </div>
-
-      {children}
-    </section>
-  );
-}
-
 function ToggleSiNo({ value, onChange }) {
   return (
-    <div className="grid grid-cols-2 rounded-2xl border border-white/15 bg-white/10 p-1">
+    <div className="grid h-10 grid-cols-2 rounded-xl border border-white/15 bg-white/10 p-1">
       <button
         type="button"
         onClick={() => onChange(true)}
         className={cls(
-          "rounded-xl px-4 py-3 text-sm font-black transition",
+          "rounded-lg px-3 text-xs font-black transition",
           value ? "bg-white text-[#131E5C]" : "text-white hover:bg-white/10",
         )}
       >
@@ -415,7 +393,7 @@ function ToggleSiNo({ value, onChange }) {
         type="button"
         onClick={() => onChange(false)}
         className={cls(
-          "rounded-xl px-4 py-3 text-sm font-black transition",
+          "rounded-lg px-3 text-xs font-black transition",
           !value ? "bg-white text-[#131E5C]" : "text-white hover:bg-white/10",
         )}
       >
@@ -430,15 +408,17 @@ function AsesorAutocomplete({ value, onChange, error }) {
 
   const opciones = useMemo(() => {
     const q = normalizarBusqueda(value);
-    if (!q) return ASESORES.slice(0, 12);
+    if (!q) return ASESORES.slice(0, 10);
 
-    return ASESORES.filter((asesor) => normalizarBusqueda(asesor).includes(q)).slice(0, 12);
+    return ASESORES.filter((asesor) =>
+      normalizarBusqueda(asesor).includes(q),
+    ).slice(0, 10);
   }, [value]);
 
   return (
     <div className="relative">
       <div className="relative">
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/55" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/55" />
         <Input
           value={value}
           error={error}
@@ -447,20 +427,20 @@ function AsesorAutocomplete({ value, onChange, error }) {
             onChange(e.target.value);
             setAbierto(true);
           }}
-          placeholder="Escribe para buscar asesor..."
-          className="pl-11"
+          placeholder="Buscar asesor..."
+          className="pl-9"
         />
       </div>
 
       {abierto ? (
-        <div className="absolute left-0 right-0 z-30 mt-2 max-h-72 overflow-y-auto rounded-2xl border border-white/10 bg-[#07122f] p-2 shadow-2xl">
+        <div className="absolute left-0 right-0 z-30 mt-2 max-h-60 overflow-y-auto rounded-xl border border-white/10 bg-[#07122f] p-1.5 shadow-2xl">
           {opciones.length === 0 ? (
             <button
               type="button"
               onClick={() => setAbierto(false)}
-              className="block w-full rounded-xl px-3 py-3 text-left text-sm font-semibold text-white/70 hover:bg-white/10"
+              className="block w-full rounded-lg px-3 py-2 text-left text-xs font-semibold text-white/70 hover:bg-white/10"
             >
-              No encontré coincidencias. Puedes dejar el nombre escrito manualmente.
+              Sin coincidencias. Puedes dejarlo escrito.
             </button>
           ) : null}
 
@@ -472,7 +452,7 @@ function AsesorAutocomplete({ value, onChange, error }) {
                 onChange(asesor);
                 setAbierto(false);
               }}
-              className="block w-full rounded-xl px-3 py-3 text-left text-sm font-bold text-white hover:bg-white/10"
+              className="block w-full rounded-lg px-3 py-2 text-left text-xs font-bold text-white hover:bg-white/10"
             >
               {asesor}
             </button>
@@ -496,23 +476,23 @@ function PasatiemposPicker({ value, onChange, error }) {
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm font-semibold text-white">Selecciona al menos 3 pasatiempos</p>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[12px] font-semibold text-white/85">Selecciona mínimo 3</p>
 
         <span
           className={cls(
-            "w-fit rounded-full border px-3 py-1 text-xs font-black",
+            "rounded-full border px-2.5 py-0.5 text-[11px] font-black",
             value.length >= 3
               ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-100"
               : "border-amber-300/40 bg-amber-400/15 text-amber-100",
           )}
         >
-          {value.length}/3 mínimos
+          {value.length}/3
         </span>
       </div>
 
-      <div className="flex max-h-[260px] flex-wrap gap-2 overflow-y-auto pr-1">
+      <div className="flex max-h-[118px] flex-wrap gap-1.5 overflow-y-auto pr-1">
         {PASATIEMPOS.map((item) => {
           const activo = seleccionados.has(item);
 
@@ -522,7 +502,7 @@ function PasatiemposPicker({ value, onChange, error }) {
               type="button"
               onClick={() => toggle(item)}
               className={cls(
-                "rounded-full border px-3 py-2 text-xs font-black transition",
+                "rounded-full border px-2.5 py-1.5 text-[11px] font-black transition",
                 activo
                   ? "border-white bg-white text-[#131E5C]"
                   : "border-white/15 bg-white/10 text-white hover:bg-white/20",
@@ -534,7 +514,7 @@ function PasatiemposPicker({ value, onChange, error }) {
         })}
       </div>
 
-      {error ? <p className="text-xs font-bold text-red-200">{error}</p> : null}
+      {error ? <p className="text-[11px] font-bold text-red-200">{error}</p> : null}
     </div>
   );
 }
@@ -599,12 +579,12 @@ export default function App() {
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(6,16,45,0.96),rgba(11,31,94,0.92),rgba(7,16,38,0.98))]" />
       </div>
 
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="relative w-full overflow-hidden rounded-lg border border-[#131E5C]/10 p-4 shadow-[0_30px_80px_-25px_rgba(19,30,92,0.14)] sm:rounded-3xl sm:p-6 md:p-8 lg:p-10"
+          className="relative w-full overflow-hidden rounded-2xl border border-[#131E5C]/10 p-3 shadow-[0_30px_80px_-25px_rgba(19,30,92,0.14)] sm:p-5 lg:p-6"
           style={{
             backgroundImage: `url(${fondo3})`,
             backgroundSize: "cover",
@@ -612,25 +592,29 @@ export default function App() {
             backgroundRepeat: "no-repeat",
           }}
         >
-          <div className="absolute inset-0 bg-[#071126]/55" />
+          <div className="absolute inset-0 bg-[#071126]/60" />
 
           <div className="relative z-10">
-            <header className="mb-6 text-center sm:mb-8">
-              <div className="mb-4 flex justify-center">
-                <span className="inline-flex items-center rounded-full border border-white bg-white/5 px-3 py-1 text-xs font-semibold tracking-wide text-white">
+            <header className="mb-4 text-center">
+              <div className="mb-2 flex justify-center">
+                <span className="inline-flex items-center rounded-full border border-white/60 bg-white/5 px-3 py-1 text-[11px] font-semibold tracking-wide text-white">
                   Automotriz R&amp;R
                 </span>
               </div>
 
-              <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
+              <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                 Registro de tráfico de piso
               </h1>
+
+              <p className="mx-auto mt-1 max-w-2xl text-xs text-white/65 sm:text-sm">
+                Captura rápida del prospecto que ingresa a la agencia.
+              </p>
             </header>
 
             {mensaje ? (
               <div
                 className={cls(
-                  "mb-5 rounded-2xl border px-4 py-3 text-sm font-bold",
+                  "mb-3 rounded-xl border px-3 py-2 text-xs font-bold",
                   guardado
                     ? "border-emerald-200/30 bg-emerald-400/15 text-emerald-100"
                     : "border-red-200/30 bg-red-400/15 text-red-100",
@@ -640,428 +624,363 @@ export default function App() {
               </div>
             ) : null}
 
-            <form onSubmit={enviarFormulario} className="space-y-5">
-              <div className="space-y-5">
-                <Seccion
-                  titulo="Datos generales"
-                  icono={UserRound}
-                >
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <Campo label="Dealer" icono={Building2} requerido error={error("agencia")}>
-                      <Select
-                        value={form.agencia}
-                        error={error("agencia")}
-                        onChange={(e) => updateField("agencia", e.target.value)}
-                      >
-                        <option value="">Seleccionar dealer...</option>
-                        {AGENCIAS.map((agencia) => (
-                          <option key={agencia} value={agencia}>
-                            {agencia}
-                          </option>
-                        ))}
-                      </Select>
-                    </Campo>
+            <form onSubmit={enviarFormulario}>
+              <div className="rounded-2xl border border-white/10 bg-[#06122f]/55 p-3 backdrop-blur-md sm:p-4">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <Campo label="Dealer" icono={Building2} requerido error={error("agencia")}>
+                    <Select
+                      value={form.agencia}
+                      error={error("agencia")}
+                      onChange={(e) => updateField("agencia", e.target.value)}
+                    >
+                      <option value="">Seleccionar...</option>
+                      {AGENCIAS.map((agencia) => (
+                        <option key={agencia} value={agencia}>
+                          {agencia}
+                        </option>
+                      ))}
+                    </Select>
+                  </Campo>
 
-                    <Campo
-                      label="Nombre del prospecto"
-                      icono={UserRound}
-                      requerido
+                  <Campo
+                    label="Nombre del prospecto"
+                    icono={UserRound}
+                    requerido
+                    error={error("nombre_prospecto")}
+                    className="sm:col-span-2"
+                  >
+                    <Input
+                      value={form.nombre_prospecto}
                       error={error("nombre_prospecto")}
-                    >
-                      <Input
-                        value={form.nombre_prospecto}
-                        error={error("nombre_prospecto")}
-                        onChange={(e) => updateField("nombre_prospecto", e.target.value.toUpperCase())}
-                        placeholder="NOMBRE COMPLETO"
-                      />
-                    </Campo>
+                      onChange={(e) => updateField("nombre_prospecto", e.target.value.toUpperCase())}
+                      placeholder="NOMBRE COMPLETO"
+                    />
+                  </Campo>
 
-                    <Campo
-                      label="Código postal"
-                      icono={ClipboardList}
-                      requerido
+                  <Campo label="Código postal" icono={ClipboardList} requerido error={error("codigo_postal")}>
+                    <Input
+                      value={form.codigo_postal}
                       error={error("codigo_postal")}
-                    >
-                      <Input
-                        value={form.codigo_postal}
-                        error={error("codigo_postal")}
-                        onChange={(e) => updateField("codigo_postal", soloNumeros(e.target.value).slice(0, 5))}
-                        inputMode="numeric"
-                        placeholder="68300"
-                      />
-                    </Campo>
+                      onChange={(e) => updateField("codigo_postal", soloNumeros(e.target.value).slice(0, 5))}
+                      inputMode="numeric"
+                      placeholder="68300"
+                    />
+                  </Campo>
 
-                    <Campo
-                      label="Teléfono"
-                      icono={Phone}
-                      requerido
+                  <Campo
+                    label="Teléfono"
+                    icono={Phone}
+                    requerido
+                    error={error("telefono")}
+                    ayuda="Válidos: 2711234567 o 522713943324."
+                  >
+                    <Input
+                      value={form.telefono}
                       error={error("telefono")}
-                      ayuda="Formatos válidos: 10 dígitos 2711234567 o 12 dígitos 522713943324."
-                    >
-                      <Input
-                        value={form.telefono}
-                        error={error("telefono")}
-                        onChange={(e) => updateField("telefono", soloNumeros(e.target.value).slice(0, 12))}
-                        inputMode="numeric"
-                        placeholder="2711234567"
-                      />
-                    </Campo>
+                      onChange={(e) => updateField("telefono", soloNumeros(e.target.value).slice(0, 12))}
+                      inputMode="numeric"
+                      placeholder="2711234567"
+                    />
+                  </Campo>
 
-                    <Campo label="E-mail" icono={Mail} error={error("email")}>
-                      <Input
-                        type="email"
-                        value={form.email}
-                        error={error("email")}
-                        onChange={(e) => updateField("email", e.target.value)}
-                        placeholder="correo@dominio.com"
-                      />
-                    </Campo>
+                  <Campo label="E-mail" icono={Mail} error={error("email")}>
+                    <Input
+                      type="email"
+                      value={form.email}
+                      error={error("email")}
+                      onChange={(e) => updateField("email", e.target.value)}
+                      placeholder="correo@dominio.com"
+                    />
+                  </Campo>
 
-                    <Campo
-                      label="Asesor de ventas"
-                      icono={Search}
-                      requerido
+                  <Campo label="Asesor de ventas" icono={Search} requerido error={error("asesor_ventas")}>
+                    <AsesorAutocomplete
+                      value={form.asesor_ventas}
                       error={error("asesor_ventas")}
-                    >
-                      <AsesorAutocomplete
-                        value={form.asesor_ventas}
-                        error={error("asesor_ventas")}
-                        onChange={(valor) => updateField("asesor_ventas", valor)}
-                      />
-                    </Campo>
+                      onChange={(valor) => updateField("asesor_ventas", valor)}
+                    />
+                  </Campo>
 
-                    <Campo
-                      label="Ingresó a la agencia porque"
-                      icono={MessageSquareText}
-                      requerido
+                  <Campo label="Ingresó porque" icono={MessageSquareText} requerido error={error("motivo_ingreso")}>
+                    <Select
+                      value={form.motivo_ingreso}
                       error={error("motivo_ingreso")}
+                      onChange={(e) => updateField("motivo_ingreso", e.target.value)}
                     >
-                      <Select
-                        value={form.motivo_ingreso}
-                        error={error("motivo_ingreso")}
-                        onChange={(e) => updateField("motivo_ingreso", e.target.value)}
-                      >
-                        <option value="">Seleccionar...</option>
-                        {MOTIVOS_INGRESO.map((opcion) => (
-                          <option key={opcion} value={opcion}>
-                            {opcion}
-                          </option>
-                        ))}
-                      </Select>
-                    </Campo>
+                      <option value="">Seleccionar...</option>
+                      {MOTIVOS_INGRESO.map((opcion) => (
+                        <option key={opcion} value={opcion}>
+                          {opcion}
+                        </option>
+                      ))}
+                    </Select>
+                  </Campo>
 
-                    <Campo label="Tipo de persona" icono={Users} requerido>
-                      <div className="grid grid-cols-2 rounded-2xl border border-white/15 bg-white/10 p-1">
-                        {TIPOS_PERSONA.map((tipo) => (
-                          <button
-                            key={tipo}
-                            type="button"
-                            onClick={() => updateField("tipo_persona", tipo)}
-                            className={cls(
-                              "rounded-xl px-4 py-3 text-sm font-black transition",
-                              form.tipo_persona === tipo
-                                ? "bg-white text-[#131E5C]"
-                                : "text-white hover:bg-white/10",
-                            )}
-                          >
-                            {tipo}
-                          </button>
-                        ))}
-                      </div>
-                    </Campo>
-                  </div>
-                </Seccion>
+                  <Campo label="Tipo de persona" icono={Users} requerido>
+                    <div className="grid h-10 grid-cols-2 rounded-xl border border-white/15 bg-white/10 p-1">
+                      {TIPOS_PERSONA.map((tipo) => (
+                        <button
+                          key={tipo}
+                          type="button"
+                          onClick={() => updateField("tipo_persona", tipo)}
+                          className={cls(
+                            "rounded-lg px-3 text-xs font-black transition",
+                            form.tipo_persona === tipo
+                              ? "bg-white text-[#131E5C]"
+                              : "text-white hover:bg-white/10",
+                          )}
+                        >
+                          {tipo}
+                        </button>
+                      ))}
+                    </div>
+                  </Campo>
 
-                <Seccion
-                  titulo="Intención de compra"
-                  icono={CarFront}
-                >
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <Campo
-                      label="¿Cuándo tiene programado comprar?"
-                      icono={CalendarDays}
-                      requerido
+                  <Campo label="Cuándo compra" icono={CalendarDays} requerido error={error("tiempo_compra")}>
+                    <Select
+                      value={form.tiempo_compra}
                       error={error("tiempo_compra")}
+                      onChange={(e) => updateField("tiempo_compra", e.target.value)}
                     >
-                      <Select
-                        value={form.tiempo_compra}
-                        error={error("tiempo_compra")}
-                        onChange={(e) => updateField("tiempo_compra", e.target.value)}
-                      >
-                        <option value="">Seleccionar...</option>
-                        {TIEMPOS_COMPRA.map((opcion) => (
-                          <option key={opcion} value={opcion}>
-                            {opcion}
-                          </option>
-                        ))}
-                      </Select>
-                    </Campo>
+                      <option value="">Seleccionar...</option>
+                      {TIEMPOS_COMPRA.map((opcion) => (
+                        <option key={opcion} value={opcion}>
+                          {opcion}
+                        </option>
+                      ))}
+                    </Select>
+                  </Campo>
 
-                    <Campo label="¿Deja auto a cuenta?" icono={CarFront} requerido>
-                      <ToggleSiNo
-                        value={form.deja_auto_cuenta}
-                        onChange={(valor) => updateField("deja_auto_cuenta", valor)}
-                      />
-                    </Campo>
+                  <Campo label="¿Auto a cuenta?" icono={CarFront} requerido>
+                    <ToggleSiNo
+                      value={form.deja_auto_cuenta}
+                      onChange={(valor) => updateField("deja_auto_cuenta", valor)}
+                    />
+                  </Campo>
 
-                    <Campo
-                      label="Modelo de auto a cuenta"
-                      icono={CarFront}
-                      requerido={form.deja_auto_cuenta}
+                  <Campo
+                    label="Modelo a cuenta"
+                    icono={CarFront}
+                    requerido={form.deja_auto_cuenta}
+                    error={error("modelo_auto_cuenta")}
+                  >
+                    <Input
+                      value={form.modelo_auto_cuenta}
                       error={error("modelo_auto_cuenta")}
-                    >
-                      <Input
-                        value={form.modelo_auto_cuenta}
-                        error={error("modelo_auto_cuenta")}
-                        disabled={!form.deja_auto_cuenta}
-                        onChange={(e) => updateField("modelo_auto_cuenta", e.target.value)}
-                        placeholder="Ej. Jetta 2020"
-                      />
-                    </Campo>
+                      disabled={!form.deja_auto_cuenta}
+                      onChange={(e) => updateField("modelo_auto_cuenta", e.target.value)}
+                      placeholder="Ej. Jetta 2020"
+                    />
+                  </Campo>
 
-                    <Campo
-                      label="Forma de capitalización"
-                      icono={CircleDollarSign}
-                      requerido
+                  <Campo
+                    label="Capitalización"
+                    icono={CircleDollarSign}
+                    requerido
+                    error={error("forma_capitalizacion")}
+                  >
+                    <Select
+                      value={form.forma_capitalizacion}
                       error={error("forma_capitalizacion")}
+                      onChange={(e) => updateField("forma_capitalizacion", e.target.value)}
                     >
-                      <Select
-                        value={form.forma_capitalizacion}
-                        error={error("forma_capitalizacion")}
-                        onChange={(e) => updateField("forma_capitalizacion", e.target.value)}
-                      >
-                        <option value="">Seleccionar...</option>
-                        {FORMAS_CAPITALIZACION.map((opcion) => (
-                          <option key={opcion} value={opcion}>
-                            {opcion}
-                          </option>
-                        ))}
-                      </Select>
-                    </Campo>
+                      <option value="">Seleccionar...</option>
+                      {FORMAS_CAPITALIZACION.map((opcion) => (
+                        <option key={opcion} value={opcion}>
+                          {opcion}
+                        </option>
+                      ))}
+                    </Select>
+                  </Campo>
 
-                    <Campo
-                      label="Presupuesto estimado"
-                      icono={BadgeDollarSign}
-                      requerido
+                  <Campo
+                    label="Presupuesto"
+                    icono={BadgeDollarSign}
+                    requerido
+                    error={error("presupuesto_estimado")}
+                    ayuda="Mín. 6 dígitos."
+                  >
+                    <Input
+                      value={form.presupuesto_estimado}
                       error={error("presupuesto_estimado")}
-                      ayuda="Debe tener al menos 6 dígitos."
-                    >
-                      <Input
-                        value={form.presupuesto_estimado}
-                        error={error("presupuesto_estimado")}
-                        onChange={(e) => updateField("presupuesto_estimado", soloNumeros(e.target.value))}
-                        inputMode="numeric"
-                        placeholder="300000"
-                      />
-                    </Campo>
+                      onChange={(e) => updateField("presupuesto_estimado", soloNumeros(e.target.value))}
+                      inputMode="numeric"
+                      placeholder="300000"
+                    />
+                  </Campo>
 
-                    <Campo
-                      label="Enganche presupuestado"
-                      icono={BadgeDollarSign}
-                      requerido
+                  <Campo
+                    label="Enganche"
+                    icono={BadgeDollarSign}
+                    requerido
+                    error={error("enganche_presupuestado")}
+                    ayuda="Mín. 5 dígitos."
+                  >
+                    <Input
+                      value={form.enganche_presupuestado}
                       error={error("enganche_presupuestado")}
-                      ayuda="Debe tener al menos 5 dígitos."
-                    >
-                      <Input
-                        value={form.enganche_presupuestado}
-                        error={error("enganche_presupuestado")}
-                        onChange={(e) => updateField("enganche_presupuestado", soloNumeros(e.target.value))}
-                        inputMode="numeric"
-                        placeholder="50000"
-                      />
-                    </Campo>
+                      onChange={(e) => updateField("enganche_presupuestado", soloNumeros(e.target.value))}
+                      inputMode="numeric"
+                      placeholder="50000"
+                    />
+                  </Campo>
 
-                    <Campo
-                      label="Mensualidades"
-                      icono={CalendarDays}
-                      requerido
+                  <Campo label="Mensualidades" icono={CalendarDays} requerido error={error("mensualidades_presupuestadas")}>
+                    <Select
+                      value={form.mensualidades_presupuestadas}
                       error={error("mensualidades_presupuestadas")}
+                      onChange={(e) => updateField("mensualidades_presupuestadas", e.target.value)}
                     >
-                      <Select
-                        value={form.mensualidades_presupuestadas}
-                        error={error("mensualidades_presupuestadas")}
-                        onChange={(e) => updateField("mensualidades_presupuestadas", e.target.value)}
-                      >
-                        <option value="">Seleccionar...</option>
-                        {MENSUALIDADES.map((opcion) => (
-                          <option key={opcion} value={opcion}>
-                            {opcion}
-                          </option>
-                        ))}
-                      </Select>
-                    </Campo>
-                  </div>
-                </Seccion>
+                      <option value="">Seleccionar...</option>
+                      {MENSUALIDADES.map((opcion) => (
+                        <option key={opcion} value={opcion}>
+                          {opcion}
+                        </option>
+                      ))}
+                    </Select>
+                  </Campo>
 
-                <Seccion
-                  titulo="Perfil financiero"
-                  icono={ShieldCheck}
-                >
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <Campo label="Comprobación de ingresos" icono={ShieldCheck} requerido>
-                      <ToggleSiNo
-                        value={form.comprueba_ingresos}
-                        onChange={(valor) => updateField("comprueba_ingresos", valor)}
-                      />
-                    </Campo>
+                  <Campo label="Comprueba ingresos" icono={ShieldCheck} requerido>
+                    <ToggleSiNo
+                      value={form.comprueba_ingresos}
+                      onChange={(valor) => updateField("comprueba_ingresos", valor)}
+                    />
+                  </Campo>
 
-                    <Campo
-                      label="Forma de comprobar ingresos"
-                      icono={ClipboardList}
-                      requerido
+                  <Campo
+                    label="Cómo comprueba"
+                    icono={ClipboardList}
+                    requerido
+                    error={error("forma_comprobar_ingresos")}
+                  >
+                    <Select
+                      value={form.forma_comprobar_ingresos}
                       error={error("forma_comprobar_ingresos")}
+                      onChange={(e) => updateField("forma_comprobar_ingresos", e.target.value)}
                     >
-                      <Select
-                        value={form.forma_comprobar_ingresos}
-                        error={error("forma_comprobar_ingresos")}
-                        onChange={(e) => updateField("forma_comprobar_ingresos", e.target.value)}
-                      >
-                        {FORMAS_COMPROBAR_INGRESOS.map((opcion) => (
-                          <option key={opcion} value={opcion}>
-                            {opcion}
-                          </option>
-                        ))}
-                      </Select>
-                    </Campo>
-                  </div>
-                </Seccion>
+                      {FORMAS_COMPROBAR_INGRESOS.map((opcion) => (
+                        <option key={opcion} value={opcion}>
+                          {opcion}
+                        </option>
+                      ))}
+                    </Select>
+                  </Campo>
 
-                <Seccion
-                  titulo="Perfil del prospecto"
-                  icono={BriefcaseBusiness}
-                >
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <Campo
-                      label="Motivo de compra"
-                      icono={MessageSquareText}
-                      requerido
+                  <Campo label="Motivo compra" icono={MessageSquareText} requerido error={error("motivo_compra")}>
+                    <Select
+                      value={form.motivo_compra}
                       error={error("motivo_compra")}
+                      onChange={(e) => updateField("motivo_compra", e.target.value)}
                     >
-                      <Select
-                        value={form.motivo_compra}
-                        error={error("motivo_compra")}
-                        onChange={(e) => updateField("motivo_compra", e.target.value)}
-                      >
-                        <option value="">Seleccionar...</option>
-                        {MOTIVOS_COMPRA.map((opcion) => (
-                          <option key={opcion} value={opcion}>
-                            {opcion}
-                          </option>
-                        ))}
-                      </Select>
-                    </Campo>
+                      <option value="">Seleccionar...</option>
+                      {MOTIVOS_COMPRA.map((opcion) => (
+                        <option key={opcion} value={opcion}>
+                          {opcion}
+                        </option>
+                      ))}
+                    </Select>
+                  </Campo>
 
-                    <Campo
-                      label="Perfil profesional"
-                      icono={BriefcaseBusiness}
-                      requerido
+                  <Campo
+                    label="Perfil profesional"
+                    icono={BriefcaseBusiness}
+                    requerido
+                    error={error("perfil_profesional")}
+                  >
+                    <Select
+                      value={form.perfil_profesional}
                       error={error("perfil_profesional")}
+                      onChange={(e) => updateField("perfil_profesional", e.target.value)}
                     >
-                      <Select
-                        value={form.perfil_profesional}
-                        error={error("perfil_profesional")}
-                        onChange={(e) => updateField("perfil_profesional", e.target.value)}
-                      >
-                        <option value="">Seleccionar...</option>
-                        {PERFILES_PROFESIONALES.map((opcion) => (
-                          <option key={opcion} value={opcion}>
-                            {opcion}
-                          </option>
-                        ))}
-                      </Select>
-                    </Campo>
+                      <option value="">Seleccionar...</option>
+                      {PERFILES_PROFESIONALES.map((opcion) => (
+                        <option key={opcion} value={opcion}>
+                          {opcion}
+                        </option>
+                      ))}
+                    </Select>
+                  </Campo>
 
-                    <Campo
-                      label="Estado civil"
-                      icono={Users}
-                      requerido
+                  <Campo label="Estado civil" icono={Users} requerido error={error("estado_civil")}>
+                    <Select
+                      value={form.estado_civil}
                       error={error("estado_civil")}
+                      onChange={(e) => updateField("estado_civil", e.target.value)}
                     >
-                      <Select
-                        value={form.estado_civil}
-                        error={error("estado_civil")}
-                        onChange={(e) => updateField("estado_civil", e.target.value)}
-                      >
-                        <option value="">Seleccionar...</option>
-                        {ESTADOS_CIVILES.map((opcion) => (
-                          <option key={opcion} value={opcion}>
-                            {opcion}
-                          </option>
-                        ))}
-                      </Select>
-                    </Campo>
+                      <option value="">Seleccionar...</option>
+                      {ESTADOS_CIVILES.map((opcion) => (
+                        <option key={opcion} value={opcion}>
+                          {opcion}
+                        </option>
+                      ))}
+                    </Select>
+                  </Campo>
 
-                    <Campo label="Edad" icono={UserRound}>
-                      <Input
-                        value={form.edad}
-                        onChange={(e) => updateField("edad", soloNumeros(e.target.value).slice(0, 3))}
-                        inputMode="numeric"
-                        placeholder="35"
-                      />
-                    </Campo>
+                  <Campo label="Edad" icono={UserRound}>
+                    <Input
+                      value={form.edad}
+                      onChange={(e) => updateField("edad", soloNumeros(e.target.value).slice(0, 3))}
+                      inputMode="numeric"
+                      placeholder="35"
+                    />
+                  </Campo>
 
-                    <Campo label="Cantidad de hijos" icono={Users}>
-                      <Input
-                        value={form.cantidad_hijos}
-                        onChange={(e) => updateField("cantidad_hijos", soloNumeros(e.target.value).slice(0, 2))}
-                        inputMode="numeric"
-                        placeholder="0"
-                      />
-                    </Campo>
-                  </div>
+                  <Campo label="Hijos" icono={Users}>
+                    <Input
+                      value={form.cantidad_hijos}
+                      onChange={(e) => updateField("cantidad_hijos", soloNumeros(e.target.value).slice(0, 2))}
+                      inputMode="numeric"
+                      placeholder="0"
+                    />
+                  </Campo>
 
-                  <div className="mt-5">
-                    <Campo
-                      label="Pasatiempos"
-                      icono={HeartHandshake}
-                      requerido
+                  <Campo
+                    label="Pasatiempos"
+                    icono={HeartHandshake}
+                    requerido
+                    error={error("pasatiempos")}
+                    className="sm:col-span-2 xl:col-span-3"
+                  >
+                    <PasatiemposPicker
+                      value={form.pasatiempos}
                       error={error("pasatiempos")}
-                    >
-                      <PasatiemposPicker
-                        value={form.pasatiempos}
-                        error={error("pasatiempos")}
-                        onChange={(valor) => updateField("pasatiempos", valor)}
-                      />
-                    </Campo>
-                  </div>
+                      onChange={(valor) => updateField("pasatiempos", valor)}
+                    />
+                  </Campo>
 
-                  <div className="mt-5">
-                    <Campo label="Comentarios" icono={MessageSquareText}>
-                      <Textarea
-                        value={form.comentarios}
-                        onChange={(e) => updateField("comentarios", e.target.value)}
-                        placeholder="Notas adicionales del asesor..."
-                      />
-                    </Campo>
-                  </div>
-                </Seccion>
+                  <Campo label="Comentarios" icono={MessageSquareText} className="sm:col-span-2 xl:col-span-1">
+                    <Textarea
+                      value={form.comentarios}
+                      onChange={(e) => updateField("comentarios", e.target.value)}
+                      placeholder="Notas..."
+                    />
+                  </Campo>
+                </div>
 
-                <div className="sticky bottom-3 z-20 rounded-3xl border border-white/10 bg-[#06122f]/85 p-4 shadow-2xl backdrop-blur-xl">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm font-semibold text-white/70">
-                      {mostrarErrores && hayErrores
-                        ? Object.values(errores)[0]
-                        : "Revisa la información antes de guardar."}
-                    </p>
+                <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#06122f]/80 p-3 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs font-semibold text-white/70">
+                    {mostrarErrores && hayErrores
+                      ? Object.values(errores)[0]
+                      : "Revisa los datos y guarda el registro."}
+                  </p>
 
-                    <button
-                      type="submit"
-                      disabled={enviando}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-black text-[#131E5C] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-                    >
-                      {enviando ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Guardando...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle2 className="h-4 w-4" />
-                          Guardar
-                        </>
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    type="submit"
+                    disabled={enviando}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-black text-[#131E5C] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                  >
+                    {enviando ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Guardando...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="h-4 w-4" />
+                        Guardar
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             </form>
