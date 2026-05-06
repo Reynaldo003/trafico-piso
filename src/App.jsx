@@ -955,9 +955,6 @@ export default function App() {
                       placeholder="Notas..."
                     />
                   </Campo>
-                </div>
-
-                <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#06122f]/80 p-3 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-xs font-semibold text-white/70">
                     {mostrarErrores && hayErrores
                       ? Object.values(errores)[0]
@@ -982,6 +979,7 @@ export default function App() {
                     )}
                   </button>
                 </div>
+
               </div>
             </form>
           </div>
