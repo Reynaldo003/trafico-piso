@@ -29,8 +29,6 @@ const AGENCIAS = [
   "VW Poza Rica",
   "VW Tuxtepec",
   "VW Tuxpan",
-  "Chirey",
-  "JAECOO R&R",
 ];
 
 const ASESORES = [
