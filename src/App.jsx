@@ -98,6 +98,28 @@ const ASESORES = [
   "JOSE ALBERTO SEDAS FLORES",
 ];
 
+const VEHICULOS = [
+  "Virtus",
+  "Polo",
+  "Jetta",
+  "Jetta GLI",
+  "Golf GTI",
+  "Taos",
+  "Nivus",
+  "Taigun",
+  "Tiguan",
+  "Teramont",
+  "Crossport",
+  "Saveiro",
+  "Amarok",
+  "Seminuevos",
+  "Tera",
+  "Avaluo",
+  "Transporter",
+  "Caddy",
+  "Crafter",
+];
+
 const MOTIVOS_INGRESO = [
   "Vi anuncios en la TV",
   "Vi anuncios en las redes sociales",
@@ -183,6 +205,7 @@ const FORM_INICIAL = {
   motivo_ingreso: "",
   tipo_persona: "Física",
   tiempo_compra: "",
+  auto_suenos: "",
   deja_auto_cuenta: false,
   modelo_auto_cuenta: "",
   forma_capitalizacion: "",
@@ -255,6 +278,7 @@ function normalizarPayload(form) {
     telefono: soloNumeros(form.telefono),
     email: texto(form.email),
     asesor_ventas: texto(form.asesor_ventas),
+    auto_suenos: texto(form.auto_suenos),
     presupuesto_estimado: Number(soloNumeros(form.presupuesto_estimado) || 0),
     enganche_presupuestado: Number(soloNumeros(form.enganche_presupuestado) || 0),
     mensualidades_presupuestadas: Number(form.mensualidades_presupuestadas || 0),
@@ -277,6 +301,7 @@ function obtenerErrores(form) {
   if (!texto(form.asesor_ventas)) errores.asesor_ventas = "Selecciona asesor.";
   if (!form.motivo_ingreso) errores.motivo_ingreso = "Selecciona ingreso.";
   if (!form.tiempo_compra) errores.tiempo_compra = "Selecciona cuándo compra.";
+  if (!form.auto_suenos) errores.auto_suenos = "Selecciona el VW de sus sueños.";
   if (form.deja_auto_cuenta && !texto(form.modelo_auto_cuenta)) {
     errores.modelo_auto_cuenta = "Captura modelo.";
   }
@@ -287,8 +312,12 @@ function obtenerErrores(form) {
   if (Number(soloNumeros(form.enganche_presupuestado) || 0) < 10000) {
     errores.enganche_presupuestado = "Mínimo 5 dígitos.";
   }
-  if (!form.mensualidades_presupuestadas) errores.mensualidades_presupuestadas = "Selecciona mensualidades.";
-  if (!form.forma_comprobar_ingresos) errores.forma_comprobar_ingresos = "Selecciona comprobación.";
+  if (!form.mensualidades_presupuestadas) {
+    errores.mensualidades_presupuestadas = "Selecciona mensualidades.";
+  }
+  if (!form.forma_comprobar_ingresos) {
+    errores.forma_comprobar_ingresos = "Selecciona comprobación.";
+  }
   if (!form.motivo_compra) errores.motivo_compra = "Selecciona motivo.";
   if (!form.perfil_profesional) errores.perfil_profesional = "Selecciona perfil.";
   if (!form.estado_civil) errores.estado_civil = "Selecciona estado civil.";
@@ -324,6 +353,7 @@ function Campo({ label, icono: Icono, requerido, error, ayuda, children, classNa
     </div>
   );
 }
+
 function Input({ error, className = "", ...props }) {
   return (
     <input
@@ -362,7 +392,7 @@ function Textarea({ error, className = "", ...props }) {
     <textarea
       {...props}
       className={cls(
-        "min-h-[52px] w-full lg:w-40 resize-none rounded-lg border bg-white/10 px-2.5 py-2 text-xs font-bold text-white outline-none transition placeholder:text-white/35",
+        "min-h-[52px] w-full resize-none rounded-lg border bg-white/10 px-2.5 py-2 text-xs font-bold text-white outline-none transition placeholder:text-white/35",
         error
           ? "border-red-200 ring-1 ring-red-300/20"
           : "border-white/10 focus:border-white/40 focus:ring-1 focus:ring-white/10",
@@ -371,6 +401,7 @@ function Textarea({ error, className = "", ...props }) {
     />
   );
 }
+
 function ToggleSiNo({ value, onChange }) {
   return (
     <div className="grid h-8 w-full lg:w-40 grid-cols-2 rounded-lg border border-white/10 bg-white/10 p-0.5">
@@ -384,6 +415,7 @@ function ToggleSiNo({ value, onChange }) {
       >
         SÍ
       </button>
+
       <button
         type="button"
         onClick={() => onChange(false)}
@@ -397,6 +429,7 @@ function ToggleSiNo({ value, onChange }) {
     </div>
   );
 }
+
 function AsesorAutocomplete({ value, onChange, error }) {
   const [abierto, setAbierto] = useState(false);
 
@@ -404,13 +437,16 @@ function AsesorAutocomplete({ value, onChange, error }) {
     const q = normalizarBusqueda(value);
     if (!q) return ASESORES.slice(0, 8);
 
-    return ASESORES.filter((asesor) => normalizarBusqueda(asesor).includes(q)).slice(0, 8);
+    return ASESORES.filter((asesor) =>
+      normalizarBusqueda(asesor).includes(q),
+    ).slice(0, 8);
   }, [value]);
 
   return (
     <div className="relative w-full lg:w-40">
       <div className="relative">
         <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-white/45" />
+
         <Input
           value={value}
           error={error}
@@ -459,19 +495,28 @@ function PasatiemposPicker({ value, onChange, error }) {
   const seleccionados = new Set(value || []);
 
   function toggle(item) {
+    const actuales = Array.isArray(value) ? value : [];
+
     if (seleccionados.has(item)) {
-      onChange((value || []).filter((x) => x !== item));
+      onChange(actuales.filter((x) => x !== item));
       return;
     }
 
-    onChange([...(value || []), item]);
+    if (actuales.length >= 3) return;
+
+    onChange([...actuales, item]);
   }
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-2">
+    <div
+      className={cls(
+        "min-h-[92px] rounded-lg border bg-white/5 p-2",
+        error ? "border-red-200 ring-1 ring-red-300/20" : "border-white/10",
+      )}
+    >
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">
-          Pasatiempos
+          Selecciona 3 opciones
         </p>
 
         <span
@@ -486,20 +531,23 @@ function PasatiemposPicker({ value, onChange, error }) {
         </span>
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
+      <div className="flex max-h-[58px] flex-wrap gap-1.5 overflow-y-auto pr-1">
         {PASATIEMPOS.map((item) => {
           const activo = seleccionados.has(item);
+          const bloqueado = !activo && value.length >= 3;
 
           return (
             <button
               key={item}
               type="button"
+              disabled={bloqueado}
               onClick={() => toggle(item)}
               className={cls(
-                "shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-black transition",
+                "rounded-full border px-2.5 py-1 text-[10px] font-black transition",
                 activo
                   ? "border-white bg-white text-[#131E5C]"
                   : "border-white/15 bg-white/10 text-white hover:bg-white/20",
+                bloqueado ? "cursor-not-allowed opacity-45" : "",
               )}
             >
               {item}
@@ -507,8 +555,6 @@ function PasatiemposPicker({ value, onChange, error }) {
           );
         })}
       </div>
-
-      {error ? <p className="mt-1 text-[10px] font-bold text-red-200">{error}</p> : null}
     </div>
   );
 }
@@ -573,7 +619,7 @@ export default function App() {
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(6,16,45,0.96),rgba(11,31,94,0.92),rgba(7,16,38,0.98))]" />
       </div>
 
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl lg:max-w-[950px] items-center justify-center px-2 py-3 sm:px-4 sm:py-4 lg:px-5">
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl items-center justify-center px-2 py-3 sm:px-4 sm:py-4 lg:max-w-[950px] lg:px-5">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
@@ -639,21 +685,29 @@ export default function App() {
                     icono={UserRound}
                     requerido
                     error={error("nombre_prospecto")}
-                    className="sm:col-span-1"
                   >
                     <Input
                       value={form.nombre_prospecto}
                       error={error("nombre_prospecto")}
-                      onChange={(e) => updateField("nombre_prospecto", e.target.value.toUpperCase())}
+                      onChange={(e) =>
+                        updateField("nombre_prospecto", e.target.value.toUpperCase())
+                      }
                       placeholder="NOMBRE COMPLETO"
                     />
                   </Campo>
 
-                  <Campo label="Código postal" icono={ClipboardList} requerido error={error("codigo_postal")}>
+                  <Campo
+                    label="Código postal"
+                    icono={ClipboardList}
+                    requerido
+                    error={error("codigo_postal")}
+                  >
                     <Input
                       value={form.codigo_postal}
                       error={error("codigo_postal")}
-                      onChange={(e) => updateField("codigo_postal", soloNumeros(e.target.value).slice(0, 5))}
+                      onChange={(e) =>
+                        updateField("codigo_postal", soloNumeros(e.target.value).slice(0, 5))
+                      }
                       inputMode="numeric"
                       placeholder="68300"
                     />
@@ -669,7 +723,9 @@ export default function App() {
                     <Input
                       value={form.telefono}
                       error={error("telefono")}
-                      onChange={(e) => updateField("telefono", soloNumeros(e.target.value).slice(0, 12))}
+                      onChange={(e) =>
+                        updateField("telefono", soloNumeros(e.target.value).slice(0, 12))
+                      }
                       inputMode="numeric"
                       placeholder="2711234567"
                     />
@@ -685,7 +741,12 @@ export default function App() {
                     />
                   </Campo>
 
-                  <Campo label="Asesor" icono={Search} requerido error={error("asesor_ventas")} className="sm:col-span-1">
+                  <Campo
+                    label="Asesor"
+                    icono={Search}
+                    requerido
+                    error={error("asesor_ventas")}
+                  >
                     <AsesorAutocomplete
                       value={form.asesor_ventas}
                       error={error("asesor_ventas")}
@@ -693,7 +754,12 @@ export default function App() {
                     />
                   </Campo>
 
-                  <Campo label="Ingresó porque" icono={MessageSquareText} requerido error={error("motivo_ingreso")}>
+                  <Campo
+                    label="Ingresó porque"
+                    icono={MessageSquareText}
+                    requerido
+                    error={error("motivo_ingreso")}
+                  >
                     <Select
                       value={form.motivo_ingreso}
                       error={error("motivo_ingreso")}
@@ -728,7 +794,12 @@ export default function App() {
                     </div>
                   </Campo>
 
-                  <Campo label="Compra" icono={CalendarDays} requerido error={error("tiempo_compra")}>
+                  <Campo
+                    label="Compra"
+                    icono={CalendarDays}
+                    requerido
+                    error={error("tiempo_compra")}
+                  >
                     <Select
                       value={form.tiempo_compra}
                       error={error("tiempo_compra")}
@@ -765,7 +836,32 @@ export default function App() {
                     />
                   </Campo>
 
-                  <Campo label="Capitalización" icono={CircleDollarSign} requerido error={error("forma_capitalizacion")}>
+                  <Campo
+                    label="VW de sus sueños"
+                    icono={CarFront}
+                    requerido
+                    error={error("auto_suenos")}
+                  >
+                    <Select
+                      value={form.auto_suenos}
+                      error={error("auto_suenos")}
+                      onChange={(e) => updateField("auto_suenos", e.target.value)}
+                    >
+                      <option value="">Seleccionar...</option>
+                      {VEHICULOS.map((vehiculo) => (
+                        <option key={vehiculo} value={vehiculo}>
+                          {vehiculo}
+                        </option>
+                      ))}
+                    </Select>
+                  </Campo>
+
+                  <Campo
+                    label="Capitalización"
+                    icono={CircleDollarSign}
+                    requerido
+                    error={error("forma_capitalizacion")}
+                  >
                     <Select
                       value={form.forma_capitalizacion}
                       error={error("forma_capitalizacion")}
@@ -780,31 +876,54 @@ export default function App() {
                     </Select>
                   </Campo>
 
-                  <Campo label="Presupuesto" icono={BadgeDollarSign} requerido error={error("presupuesto_estimado")} ayuda="Mín. 6 dígitos.">
+                  <Campo
+                    label="Presupuesto"
+                    icono={BadgeDollarSign}
+                    requerido
+                    error={error("presupuesto_estimado")}
+                    ayuda="Mín. 6 dígitos."
+                  >
                     <Input
                       value={form.presupuesto_estimado}
                       error={error("presupuesto_estimado")}
-                      onChange={(e) => updateField("presupuesto_estimado", soloNumeros(e.target.value))}
+                      onChange={(e) =>
+                        updateField("presupuesto_estimado", soloNumeros(e.target.value))
+                      }
                       inputMode="numeric"
                       placeholder="300000"
                     />
                   </Campo>
 
-                  <Campo label="Enganche" icono={BadgeDollarSign} requerido error={error("enganche_presupuestado")} ayuda="Mín. 5 dígitos.">
+                  <Campo
+                    label="Enganche"
+                    icono={BadgeDollarSign}
+                    requerido
+                    error={error("enganche_presupuestado")}
+                    ayuda="Mín. 5 dígitos."
+                  >
                     <Input
                       value={form.enganche_presupuestado}
                       error={error("enganche_presupuestado")}
-                      onChange={(e) => updateField("enganche_presupuestado", soloNumeros(e.target.value))}
+                      onChange={(e) =>
+                        updateField("enganche_presupuestado", soloNumeros(e.target.value))
+                      }
                       inputMode="numeric"
                       placeholder="50000"
                     />
                   </Campo>
 
-                  <Campo label="Mensualidades" icono={CalendarDays} requerido error={error("mensualidades_presupuestadas")}>
+                  <Campo
+                    label="Mensualidades"
+                    icono={CalendarDays}
+                    requerido
+                    error={error("mensualidades_presupuestadas")}
+                  >
                     <Select
                       value={form.mensualidades_presupuestadas}
                       error={error("mensualidades_presupuestadas")}
-                      onChange={(e) => updateField("mensualidades_presupuestadas", e.target.value)}
+                      onChange={(e) =>
+                        updateField("mensualidades_presupuestadas", e.target.value)
+                      }
                     >
                       <option value="">Seleccionar...</option>
                       {MENSUALIDADES.map((opcion) => (
@@ -822,11 +941,18 @@ export default function App() {
                     />
                   </Campo>
 
-                  <Campo label="Comprueba con" icono={ClipboardList} requerido error={error("forma_comprobar_ingresos")}>
+                  <Campo
+                    label="Comprueba con"
+                    icono={ClipboardList}
+                    requerido
+                    error={error("forma_comprobar_ingresos")}
+                  >
                     <Select
                       value={form.forma_comprobar_ingresos}
                       error={error("forma_comprobar_ingresos")}
-                      onChange={(e) => updateField("forma_comprobar_ingresos", e.target.value)}
+                      onChange={(e) =>
+                        updateField("forma_comprobar_ingresos", e.target.value)
+                      }
                     >
                       {FORMAS_COMPROBAR_INGRESOS.map((opcion) => (
                         <option key={opcion} value={opcion}>
@@ -836,7 +962,12 @@ export default function App() {
                     </Select>
                   </Campo>
 
-                  <Campo label="Motivo compra" icono={MessageSquareText} requerido error={error("motivo_compra")}>
+                  <Campo
+                    label="Motivo compra"
+                    icono={MessageSquareText}
+                    requerido
+                    error={error("motivo_compra")}
+                  >
                     <Select
                       value={form.motivo_compra}
                       error={error("motivo_compra")}
@@ -851,7 +982,12 @@ export default function App() {
                     </Select>
                   </Campo>
 
-                  <Campo label="Perfil" icono={BriefcaseBusiness} requerido error={error("perfil_profesional")}>
+                  <Campo
+                    label="Perfil"
+                    icono={BriefcaseBusiness}
+                    requerido
+                    error={error("perfil_profesional")}
+                  >
                     <Select
                       value={form.perfil_profesional}
                       error={error("perfil_profesional")}
@@ -866,60 +1002,86 @@ export default function App() {
                     </Select>
                   </Campo>
 
-                  <Campo label="Estado civil" icono={Users} requerido error={error("estado_civil")}>
-                    <Select
-                      value={form.estado_civil}
-                      error={error("estado_civil")}
-                      onChange={(e) => updateField("estado_civil", e.target.value)}
-                    >
-                      <option value="">Seleccionar...</option>
-                      {ESTADOS_CIVILES.map((opcion) => (
-                        <option key={opcion} value={opcion}>
-                          {opcion}
-                        </option>
-                      ))}
-                    </Select>
-                  </Campo>
+                  <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-5">
+                    <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
+                      <Campo
+                        label="Estado civil"
+                        icono={Users}
+                        requerido
+                        error={error("estado_civil")}
+                      >
+                        <Select
+                          value={form.estado_civil}
+                          error={error("estado_civil")}
+                          onChange={(e) => updateField("estado_civil", e.target.value)}
+                          className="lg:!w-full"
+                        >
+                          <option value="">Seleccionar...</option>
+                          {ESTADOS_CIVILES.map((opcion) => (
+                            <option key={opcion} value={opcion}>
+                              {opcion}
+                            </option>
+                          ))}
+                        </Select>
+                      </Campo>
 
-                  <Campo label="Edad" icono={UserRound}>
-                    <Input
-                      value={form.edad}
-                      onChange={(e) => updateField("edad", soloNumeros(e.target.value).slice(0, 3))}
-                      inputMode="numeric"
-                      placeholder="35"
-                    />
-                  </Campo>
+                      <Campo label="Edad" icono={UserRound}>
+                        <Input
+                          value={form.edad}
+                          onChange={(e) =>
+                            updateField("edad", soloNumeros(e.target.value).slice(0, 3))
+                          }
+                          inputMode="numeric"
+                          placeholder="35"
+                          className="lg:!w-full"
+                        />
+                      </Campo>
 
-                  <Campo label="Hijos" icono={Users}>
-                    <Input
-                      value={form.cantidad_hijos}
-                      onChange={(e) => updateField("cantidad_hijos", soloNumeros(e.target.value).slice(0, 2))}
-                      inputMode="numeric"
-                      placeholder="0"
-                    />
-                  </Campo>
+                      <Campo label="Hijos" icono={Users}>
+                        <Input
+                          value={form.cantidad_hijos}
+                          onChange={(e) =>
+                            updateField("cantidad_hijos", soloNumeros(e.target.value).slice(0, 2))
+                          }
+                          inputMode="numeric"
+                          placeholder="0"
+                          className="lg:!w-full"
+                        />
+                      </Campo>
+                    </div>
+                  </div>
 
-                  <Campo
-                    label="Pasatiempos"
-                    icono={HeartHandshake}
-                    requerido
-                    error={error("pasatiempos")}
-                    className="sm:col-span-2 lg:col-span-2"
-                  >
-                    <PasatiemposPicker
-                      value={form.pasatiempos}
-                      error={error("pasatiempos")}
-                      onChange={(valor) => updateField("pasatiempos", valor)}
-                    />
-                  </Campo>
+                  <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-5">
+                    <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-5">
+                      <Campo
+                        label="Pasatiempos"
+                        icono={HeartHandshake}
+                        requerido
+                        error={error("pasatiempos")}
+                        className="lg:col-span-2"
+                      >
+                        <PasatiemposPicker
+                          value={form.pasatiempos}
+                          error={error("pasatiempos")}
+                          onChange={(valor) => updateField("pasatiempos", valor)}
+                        />
+                      </Campo>
 
-                  <Campo label="Comentarios" icono={MessageSquareText} className="sm:col-span-1">
-                    <Textarea
-                      value={form.comentarios}
-                      onChange={(e) => updateField("comentarios", e.target.value)}
-                      placeholder="Notas..."
-                    />
-                  </Campo>
+                      <Campo
+                        label="Comentarios"
+                        icono={MessageSquareText}
+                        className="lg:col-span-3"
+                      >
+                        <Textarea
+                          value={form.comentarios}
+                          onChange={(e) => updateField("comentarios", e.target.value)}
+                          placeholder="Notas adicionales del prospecto..."
+                          rows={3}
+                          className="min-h-[92px]"
+                        />
+                      </Campo>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-3 flex flex-col gap-2 rounded-xl border border-white/10 bg-[#06122f]/80 p-2.5 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">

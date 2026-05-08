@@ -51,6 +51,7 @@ export async function crearTraficoPiso(respuestas) {
     tipo_persona: limpiarTexto(respuestas.tipo_persona),
 
     tiempo_compra: limpiarTexto(respuestas.tiempo_compra),
+    auto_suenos: limpiarTexto(respuestas.auto_suenos),
     deja_auto_cuenta: Boolean(respuestas.deja_auto_cuenta),
     modelo_auto_cuenta: respuestas.deja_auto_cuenta
       ? limpiarTexto(respuestas.modelo_auto_cuenta)
