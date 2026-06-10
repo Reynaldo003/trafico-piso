@@ -193,24 +193,6 @@ const PASATIEMPOS = [
   "Yoga",
   "Neurociencias",
   "Aprendizaje de idioma",
-  "Agronomía",
-  "Cafeticultura",
-  "Ganadería",
-  "Equitación",
-  "Charrería",
-  "Maquinaria",
-  "Motociclismo",
-  "Camping",
-  "Ecoturismo",
-  "Jardineria",
-  "Floricultura",
-  "Béisbol",
-  "Gimnasio", 
-  "Crossfit",
-  "Mascotas",
-  "Gastronomia",
-  "Bricolaje",
-  "Compras",
 ];
 
 const TIPO_VENTA = [
@@ -228,6 +210,7 @@ const FORM_INICIAL = {
   asesor_ventas: "",
   motivo_ingreso: "",
   tipo_persona: "Física",
+  tipo_venta: "",
   tiempo_compra: "",
   auto_suenos: "",
   deja_auto_cuenta: false,
@@ -302,6 +285,10 @@ function normalizarPayload(form) {
     telefono: soloNumeros(form.telefono),
     email: texto(form.email),
     asesor_ventas: texto(form.asesor_ventas),
+    motivo_ingreso: texto(form.motivo_ingreso),
+    tipo_persona: texto(form.tipo_persona),
+    tipo_venta: texto(form.tipo_venta),
+    tiempo_compra: texto(form.tiempo_compra),
     auto_suenos: texto(form.auto_suenos),
     presupuesto_estimado: Number(soloNumeros(form.presupuesto_estimado) || 0),
     enganche_presupuestado: Number(soloNumeros(form.enganche_presupuestado) || 0),
@@ -324,6 +311,7 @@ function obtenerErrores(form) {
   if (!validarEmail(form.email)) errores.email = "Correo inválido.";
   if (!texto(form.asesor_ventas)) errores.asesor_ventas = "Selecciona asesor.";
   if (!form.motivo_ingreso) errores.motivo_ingreso = "Selecciona ingreso.";
+  if (!form.tipo_venta) errores.tipo_venta = "Selecciona tipo de venta.";
   if (!form.tiempo_compra) errores.tiempo_compra = "Selecciona cuándo compra.";
   if (!form.auto_suenos) errores.auto_suenos = "Selecciona el VW de sus sueños.";
   if (form.deja_auto_cuenta && !texto(form.modelo_auto_cuenta)) {
@@ -817,7 +805,6 @@ export default function App() {
                       ))}
                     </div>
                   </Campo>
-
                   <Campo
                     label="Compra"
                     icono={CalendarDays}
@@ -1027,7 +1014,7 @@ export default function App() {
                   </Campo>
 
                   <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-5">
-                    <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-2.5 md:grid-cols-4">
                       <Campo
                         label="Estado civil"
                         icono={Users}
@@ -1071,6 +1058,38 @@ export default function App() {
                           placeholder="0"
                           className="lg:!w-full"
                         />
+                      </Campo>
+                      <Campo
+                        label="Tipo de venta"
+                        icono={CarFront}
+                        requerido
+                        error={error("tipo_venta")}
+                      >
+                        <div
+                          className={cls(
+                            "grid h-8 w-full grid-cols-3 rounded-lg border bg-white/10 p-0.5 lg:w-52",
+                            error("tipo_venta")
+                              ? "border-red-200 ring-1 ring-red-300/20"
+                              : "border-white/10",
+                          )}
+                        >
+                          {TIPO_VENTA.map((tipo) => (
+                            <button
+                              key={tipo}
+                              type="button"
+                              onClick={() => updateField("tipo_venta", tipo)}
+                              className={cls(
+                                "min-w-0 truncate whitespace-nowrap rounded-md px-2 text-[10px] font-black transition",
+                                form.tipo_venta === tipo
+                                  ? "bg-white text-[#131E5C]"
+                                  : "text-white/80 hover:bg-white/10",
+                              )}
+                              title={tipo}
+                            >
+                              {tipo}
+                            </button>
+                          ))}
+                        </div>
                       </Campo>
                     </div>
                   </div>
