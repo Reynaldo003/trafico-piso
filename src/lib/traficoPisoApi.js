@@ -49,6 +49,7 @@ export async function crearTraficoPiso(respuestas) {
     asesor_ventas: limpiarTexto(respuestas.asesor_ventas),
     motivo_ingreso: limpiarTexto(respuestas.motivo_ingreso),
     tipo_persona: limpiarTexto(respuestas.tipo_persona),
+    tipo_venta: limpiarTexto(respuestas.tipo_venta),
 
     tiempo_compra: limpiarTexto(respuestas.tiempo_compra),
     auto_suenos: limpiarTexto(respuestas.auto_suenos),

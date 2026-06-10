@@ -195,6 +195,12 @@ const PASATIEMPOS = [
   "Aprendizaje de idioma",
 ];
 
+const TIPO_VENTA = [
+  "Nuevos",
+  "Usados",
+  "Comerciales",
+];
+
 const FORM_INICIAL = {
   agencia: "",
   nombre_prospecto: "",
