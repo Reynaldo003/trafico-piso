@@ -318,8 +318,8 @@ function obtenerErrores(form) {
     errores.modelo_auto_cuenta = "Captura modelo.";
   }
   if (!form.forma_capitalizacion) errores.forma_capitalizacion = "Selecciona capitalización.";
-  if (Number(soloNumeros(form.presupuesto_estimado) || 0) < 100000) {
-    errores.presupuesto_estimado = "Mínimo 6 dígitos.";
+  if (Number(soloNumeros(form.presupuesto_estimado) || 0) < 10000) {
+    errores.presupuesto_estimado = "Mínimo 5 dígitos.";
   }
   if (Number(soloNumeros(form.enganche_presupuestado) || 0) < 10000) {
     errores.enganche_presupuestado = "Mínimo 5 dígitos.";
@@ -892,7 +892,7 @@ export default function App() {
                     icono={BadgeDollarSign}
                     requerido
                     error={error("presupuesto_estimado")}
-                    ayuda="Mín. 6 dígitos."
+                    ayuda="Mín. 5 dígitos."
                   >
                     <Input
                       value={form.presupuesto_estimado}
