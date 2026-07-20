@@ -96,6 +96,7 @@ const ASESORES = [
   "Estefano Marlom De Azcue Aparicio",
   "VANESSA JIMENEZ MEDINA",
   "JOSE ALBERTO SEDAS FLORES",
+  "Luis Manuel Alvarez Martinez"
 ];
 
 const VEHICULOS = [
