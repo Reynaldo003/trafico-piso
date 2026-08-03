@@ -99,6 +99,9 @@ const ASESORES = [
   "Luis Manuel Alvarez Martinez",
   "Blanca Patricia Hernández Hernández",
   "Luis Manuel Hernández Espejo",
+  "David Uriel García Navarro",
+  "Gustavo Chontal Romero",
+  "Maria Monserrath Zarate Gamboa"
 ];
 
 const VEHICULOS = [
